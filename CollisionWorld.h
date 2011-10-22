@@ -6,6 +6,7 @@ using namespace std;
 
 #include "Line.h"
 #include "IntersectionDetection.h"
+#include "Quadtree.h"
 #include <cilk/reducer_list.h>
 class CollisionWorld
 {
