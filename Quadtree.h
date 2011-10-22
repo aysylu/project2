@@ -1,3 +1,6 @@
+#ifndef QUADTREE_H
+#define QUADTREE_H
+
 #include "Line.h"
 #include <vector>
 using namespace std;
@@ -10,9 +13,12 @@ class Quadtree{
   int end_height;
 
   vector<Line *> lines;
+
+  int divisionThresh;
  public:
   Quadtree(int, int, int, int);
   void descend(vector<Line *>);
+  ~Quadtree();
   
  private:
   Quadtree * one;
@@ -20,4 +26,6 @@ class Quadtree{
   Quadtree * three;
   Quadtree * four;
   void divideSelf();
-}
+};
+
+#endif /* QUADTREE_H*/
