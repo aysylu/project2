@@ -7,7 +7,7 @@ Quadtree::Quadtree(int _start_width, int _end_width, int _start_height, int _end
   end_height = _end_height;
 }
 
-Quadtree::DivideSelf(){
+void Quadtree::divideSelf(){
   // Width of first quadrant
   int start_width_one = start_width;
   int end_width_one = start_with + (end_width-start_width)/2;
@@ -49,4 +49,13 @@ Quadtree::DivideSelf(){
   two = _two;
   three = _three;
   four = _four;
+}
+
+void Quadtree::descend(vector<Line *> _lines) {
+  lines = _lines;
+
+  vector<Line *>::iterator it;
+  for (it=lines.begin(); i < lines.end(); it++) {
+    printf("p1, p2 %f%f", it->p1, it->p2);
+  }
 }

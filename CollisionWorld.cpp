@@ -7,7 +7,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdio.h>
-
+#include "Quadtree.h"
 #include "CollisionWorld.h"
 #include "IntersectionDetection.h"
 #include "Line.h"
@@ -35,6 +35,8 @@ void CollisionWorld::updateLines()
 void CollisionWorld::detectIntersection()
 {
    vector<Line*>::iterator it1, it2;
+   Quadtree * qtree = new Quadtree(0, boxWidth, 0, boxHeight);
+   qtree->descend(lines);
    for (it1 = lines.begin(); it1 != lines.end(); ++it1) {
       Line *l1 = *it1;
       for (it2 = it1 + 1; it2 != lines.end(); ++it2) {
