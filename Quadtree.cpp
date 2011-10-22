@@ -51,24 +51,73 @@ void Quadtree::divideSelf(){
   four = _four;
 }
 
+vector<Line *> * Quadtree::distributeLines(Quadtree * qtree){
+  vector<Line *> * linesInTree = new vector<Line*>();
+  vector<Line*>::iterator it;
+  
+  int qtree_sw = qtree->start_width;
+  int qtree_ew = qtree->end_width;
+  int qtree_sh = qtree->start_height;
+  int qtree_eh = qtree->end_height;
+
+  printf("Coordinates for box:\n");
+  printf("(sw=%d , ew=%d), (sh=%d, eh=%d)\n", qtree_sw,
+	 qtree_ew, qtree_sh, qtree_eh);
+  printf("Includes lines:\n");
+  
+  for (it=lines.begin(); it < lines.end(); it++){
+    Line * line = *it;
+    
+    // Check if x coordinates of line fall into our box
+    if(line->p1.x >= qtree_sw && line->p2.x <= qtree_ew){
+      // Check if y coordinates of line fall into our box
+      
+      // Assume that top left corner is the (0,0) coordinate 
+      if(line->p1.y >= qtree_sh && line->p2.y <= qtree_eh){
+	// The line is inside the quadtree
+	printf("(x1=%f, y1=%f), (x2=%f, y2=%f)\n", line->p1.x,
+	       line->p1.y, line->p2.x, line->p2.y);
+	
+	linesInTree->push_back(line);
+      }
+    }
+  }
+
+  return linesInTree;
+}
+
 void Quadtree::descend(vector<Line *> _lines) {
   lines = _lines;
 
   if (lines.size() < divisionThresh) {
-    detectCollisions(); //TODO: implement this
+    // detectCollisions(); //TODO: implement this
   } else {
+    vector<Line *> * oneLines;
+    vector<Line *> * twoLines;
+    vector<Line *> * threeLines;
+    vector<Line *> * fourLines;
+    
     divideSelf();
+    
     oneLines = distributeLines(one); //TODO: implement this
-    one->descend(one_lines);
-    //TODO: same for two, three, four
+    // one->descend(oneLines);
+
+    twoLines = distributeLines(two);
+    // two->descend(twoLines);
+
+    threeLines = distributeLines(three);
+    // three->descend(threeLines);
+
+    fourLines = distributeLines(four);
+    // four->descend(fourLines);
   }
 
-  vector<Line *>::iterator it;
-  for (it=lines.begin(); it < lines.end(); it++) {
-      Line *l1 = *it;
-      printf("p1 x, p1 y, p2 x, p2 y %f %f %f %f\n", l1->p1.x, l1->p1.y, l1->p2.x, l1->p2.y);
-      printf("p1 = %llx\n", &(l1->p1));
-  }
+  // vector<Line *>::iterator it;
+  // for (it=lines.begin(); it < lines.end(); it++) {
+  //     Line *l1 = *it;
+  //     printf("p1 x, p1 y, p2 x, p2 y %f %f %f %f\n", l1->p1.x, l1->p1.y, l1->p2.x, l1->p2.y);
+  //     printf("p1 = %llx\n", &(l1->p1));
+  // }
 }
 
 Quadtree::~Quadtree() {

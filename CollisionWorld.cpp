@@ -24,13 +24,13 @@ CollisionWorld::CollisionWorld()
 void CollisionWorld::updateLines()
 {
 //   detectIntersection();
+   Quadtree * qtree = new Quadtree(0, boxWidth, 0, boxHeight);
+   qtree->descend(lines);
+   delete(qtree);
+   
    updatePosition();
    lineWallCollision();
 }
-
-   //Quadtree * qtree = new Quadtree(0, boxWidth, 0, boxHeight);
-   //qtree->descend(lines);
-   //delete(qtree);
 
 // Test all line-line pairs to see if they will intersect before the next time
 // step.

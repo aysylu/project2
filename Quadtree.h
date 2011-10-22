@@ -26,6 +26,7 @@ class Quadtree{
   Quadtree * three;
   Quadtree * four;
   void divideSelf();
+  vector<Line*>* distributeLines(Quadtree *);
 };
 
 #endif /* QUADTREE_H*/
