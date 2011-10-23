@@ -43,7 +43,12 @@ class Quadtree{
   double qtree_eh;
   
   void divideSelf();
-  vector<Line*>* distributeLines(Quadtree *);
+
+  vector<Line*>* distributeLinesOne(Quadtree *);
+  vector<Line*>* distributeLinesTwo(Quadtree *);
+  vector<Line*>* distributeLinesThree(Quadtree *);
+  vector<Line*>* distributeLinesFour(Quadtree *);
+
   int detectLineLineCollisions(vector<Line*> *);
   //int detectLineWallCollisions(vector<Line*> *);
 };
