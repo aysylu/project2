@@ -7,11 +7,6 @@
 #include <algorithm>
 using namespace std;
 
-typedef struct _COLLISION{
-  int numLineLineCollisions;
-  int numLineWallCollisions;
-} COLLISION, *PCOLLISION;
-
 class Quadtree{
   double start_width;
   double end_width;
@@ -21,9 +16,7 @@ class Quadtree{
 
   double timeStep;
 
-  /* int numLineLineCollisions; */
-  /* int numLineWallCollisions; */
-  COLLISION collisions;
+  int numLineLineCollisions;
 
   vector<Line *> lines;
 
@@ -34,7 +27,7 @@ class Quadtree{
   
  public:
   Quadtree(double, double, double, double);
-  COLLISION descend(vector<Line *>);
+  int descend(vector<Line *>);
   ~Quadtree();
   
  private:
@@ -60,8 +53,6 @@ class Quadtree{
   int detectSpanningLineLineCollisions(vector<Line*> *, vector<Line*> *,
                     vector<Line*> *,vector<Line*> *, vector<Line*> *);
   int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
-  int detectLineWallCollisions(vector<Line *> *);
-  //int detectLineWallCollisions(vector<Line*> *);
 };
 
 #endif /* QUADTREE_H*/
