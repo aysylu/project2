@@ -24,7 +24,7 @@ CollisionWorld::CollisionWorld()
 void CollisionWorld::updateLines()
 {
 //   detectIntersection();
-   Quadtree * qtree = new Quadtree(0, boxWidth, 0, boxHeight);
+   Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
    qtree->descend(lines);
    delete(qtree);
    
