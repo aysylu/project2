@@ -24,7 +24,7 @@ CollisionWorld::CollisionWorld()
 // Update the lines.
 void CollisionWorld::updateLines()
 {
-   detectIntersection();
+//   detectIntersection();
 
    int linesLength = lines.size();
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
@@ -36,7 +36,8 @@ void CollisionWorld::updateLines()
    delete(qtree);
 
    assert(linesLength == lines.size());
-   
+
+   detectIntersection();   
    updatePosition();
    lineWallCollision();
 }
@@ -52,6 +53,8 @@ void CollisionWorld::detectIntersection()
          Line *l2 = *it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
+//printf("----------------------------------------------------------------------------\n");
+//            printf("collision (colWorld): ((%f, %f), (%f, %f)) ((%f, %f), (%f, %f))\n", l1->p1.x, l1->p2.x, l1->p1.y, l1->p2.y, l2->p1.x, l2->p2.x, l2->p1.y, l2->p2.y); 
             collisionSolver(l1, l2, intersectionType);
             numLineLineCollisions++;
          }
@@ -175,6 +178,8 @@ void CollisionWorld::lineWallCollision()
       }
       // Update total number of collisions
       if (collide == true) {
+printf("_________________________________________________________________________________________\n");
+printf("line-wall collision world ((%f, %f), (%f, %f)) velX=%f, velY=%f\n", line->p1.x, line->p2.x, line->p1.y, line->p2.y, line->vel.x, line->vel.y);
          numLineWallCollisions++;
       }
    }

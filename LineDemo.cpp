@@ -14,6 +14,7 @@
 bool LineDemo::update()
 {
    count++;
+printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
    collisionWorld->updateLines();
    if (count > numFrames) {
       return false;
