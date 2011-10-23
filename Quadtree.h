@@ -50,6 +50,9 @@ class Quadtree{
   vector<Line*>* distributeLinesFour(Quadtree *);
 
   int detectLineLineCollisions(vector<Line*> *);
+  int detectSpanningLineLineCollisions(vector<Line*> *, vector<Line*> *,
+                    vector<Line*> *,vector<Line*> *, vector<Line*> *);
+  int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
   //int detectLineWallCollisions(vector<Line*> *);
 };
 

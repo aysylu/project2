@@ -217,7 +217,8 @@ int Quadtree::descend(vector<Line *> _lines) {
 //           (int) fourLines->size() + (int) spanningLines.size() == (int) lines.size());
 
     if (spanningLines.size() > 0) {
-      totalCollisions += detectLineLineCollisions(&spanningLines);
+      totalCollisions += detectSpanningLineLineCollisions(&spanningLines, oneLines,
+                                  twoLines, threeLines, fourLines);
       //detectLineWallCollisions(&spanningLines); //TODO: implement
     }
 
@@ -230,15 +231,51 @@ int Quadtree::descend(vector<Line *> _lines) {
   return totalCollisions;
 }
 
+int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
+                                               vector<Line *> * otherLines) {
+   vector<Line*>::iterator _it1, _it2;
+   int numCollisions = 0;
+   for (_it1 = _lines->begin(); _it1 != _lines->end(); ++_it1) {
+      Line *l1 = *_it1;
+      for (_it2 = otherLines->begin(); _it2 != otherLines->end(); ++_it2) {
+         Line *l2 = *_it2;
+         IntersectionType intersectionType = intersect(l1, l2, timeStep);
+         if (intersectionType != NO_INTERSECTION) {
+printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+//     printf("Num of collisions so far %d\n", numLineLineCollisions);
+//            collisionSolver(l1, l2, intersectionType);
+            numCollisions++;
+         }
+      }
+   }
+//   printf("detectLineCollisions found: %d in the quadtree\n", numLineLineCollisions);
+   return numCollisions;
+  
+}
+
+//TODO: this needs to be fixed -- does double counting now
+int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _lines,
+                              vector<Line *> * _linesOne, vector<Line *> * _linesTwo,
+                            vector<Line *> * _linesThree, vector<Line *> * _linesFour)
+{
+   numLineLineCollisions += detectLineLineCollisionsTwoLines(_lines, _linesOne);
+   numLineLineCollisions += detectLineLineCollisionsTwoLines(_lines, _linesTwo);
+   numLineLineCollisions += detectLineLineCollisionsTwoLines(_lines, _linesThree);
+   numLineLineCollisions += detectLineLineCollisionsTwoLines(_lines, _linesFour);
+   numLineLineCollisions += detectLineLineCollisions(_lines);
+//   printf("detectLineCollisions found: %d in the quadtree\n", numLineLineCollisions);
+   return numLineLineCollisions;
+}
+
 int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    vector<Line*>::iterator it1, it2;
    for (it1 = _lines->begin(); it1 != _lines->end(); ++it1) {
       Line *l1 = *it1;
-      for (it2 = lines.begin(); it2 != lines.end(); ++it2) {
+      for (it2 = it1 + 1; it2 != _lines->end(); ++it2) {
          Line *l2 = *it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
-// printf("**********************************************************************\n");
+printf("**********************************************************************\n");
 //     printf("Num of collisions so far %d\n", numLineLineCollisions);
 //            collisionSolver(l1, l2, intersectionType);
             numLineLineCollisions++;
