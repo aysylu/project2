@@ -10,6 +10,15 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   two = NULL;
   three = NULL;
   four = NULL;
+  linesInTree = NULL;
+  parent = NULL;
+  
+  qtree_sw = 0;
+  qtree_ew = 0;
+  
+  qtree_sh = 0;
+  qtree_eh = 0;
+
   //TODO: figure out what to do with init of lines
   timeStep = 0.5;
   numLineLineCollisions = 0;
@@ -57,6 +66,11 @@ void Quadtree::divideSelf() {
   two = _two;
   three = _three;
   four = _four;
+
+  one->parent = this;
+  two->parent = this;
+  three->parent = this;
+  four->parent = this;
 }
 
 vector<Line *> * Quadtree::distributeLines(Quadtree * qtree){
@@ -76,31 +90,29 @@ vector<Line *> * Quadtree::distributeLines(Quadtree * qtree){
   
   for (it=lines.begin(); it < lines.end(); it++){
     Line * line = *it;
-    
-    // Check if x coordinates of line fall into our box
-    if(line->p1.x >= qtree_sw && line->p2.x <= qtree_ew){
-      // Check if y coordinates of line fall into our box
-      
-      // Assume that top left corner is the (0,0) coordinate 
-      if(line->p1.y >= qtree_sh && line->p2.y <= qtree_eh){
-	// The line is inside the quadtree
-	//printf("(x1=%f, y1=%f), (x2=%f, y2=%f)\n", line->p1.x,
-	//       line->p1.y, line->p2.x, line->p2.y);
-	
+    if((line->p1.x >= qtree_sw && line->p1.x <= qtree_ew) &&
+       (line->p1.y >= qtree_sh && line->p1.y <= qtree_eh)){
+      // Check if the second point is in the box
+      if((line->p2.x >= qtree_sw && line->p2.x <= qtree_ew) &&
+	 (line->p2.y >= qtree_sh && line->p2.y <= qtree_eh)){
+	// The line is in the box...
 	linesInTree->push_back(line);
       }
-    }
+      // The line spans more than one quadtree
+      parent->spanningLines.push_back(line);
+   }
   }
 
   return linesInTree;
 }
 
-void Quadtree::descend(vector<Line *> _lines) {
+int Quadtree::descend(vector<Line *> _lines) {
   lines = _lines;
-
+  int totalCollisions=0;
   if (lines.size() < divisionThresh) {
-    detectCollisions();
+    totalCollisions = detectLineCollisions();
   } else {
+
     vector<Line *> * oneLines;
     vector<Line *> * twoLines;
     vector<Line *> * threeLines;
@@ -110,22 +122,22 @@ void Quadtree::descend(vector<Line *> _lines) {
     
     //printf("Lines size is %d\n", (int) lines.size());
     oneLines = distributeLines(one);
-    one->descend(*oneLines);
+    totalCollisions += one->descend(*oneLines);
 
     //printf("Lines size is %d\n", (int) lines.size());
     twoLines = distributeLines(two);
-    two->descend(*twoLines);
+    totalCollisions += two->descend(*twoLines);
 
     //printf("Lines size is %d\n", (int) lines.size());
     threeLines = distributeLines(three);
-    three->descend(*threeLines);
+    totalCollisions += three->descend(*threeLines);
 
     //printf("Lines size is %d\n", (int) lines.size());
     fourLines = distributeLines(four);
-    four->descend(*fourLines);
+    totalCollisions += four->descend(*fourLines);
 
   }
-
+  return totalCollisions;
   // vector<Line *>::iterator it;
   // for (it=lines.begin(); it < lines.end(); it++) {
   //     Line *l1 = *it;
@@ -134,7 +146,7 @@ void Quadtree::descend(vector<Line *> _lines) {
   // }
 }
 
-void Quadtree::detectCollisions() {
+int Quadtree::detectLineCollisions() {
    vector<Line*>::iterator it1, it2;
    for (it1 = lines.begin(); it1 != lines.end(); ++it1) {
       Line *l1 = *it1;
@@ -142,13 +154,15 @@ void Quadtree::detectCollisions() {
          Line *l2 = *it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
-printf("**********************************************************************\n");
-    printf("Num of collisions so far %d\n", numLineLineCollisions);
+// printf("**********************************************************************\n");
+//     printf("Num of collisions so far %d\n", numLineLineCollisions);
             //collisionSolver(l1, l2, intersectionType);
             numLineLineCollisions++;
          }
       }
    }
+   printf("detectLineCollisions found: %d in the quadtree\n", numLineLineCollisions);
+   return numLineLineCollisions;
 }
 
 Quadtree::~Quadtree() {

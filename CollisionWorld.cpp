@@ -16,6 +16,7 @@ CollisionWorld::CollisionWorld()
 {
    numLineWallCollisions = 0;
    numLineLineCollisions = 0;
+   quadtree_lineLineCollisions = 0;
    timeStep = 0.5;
 }
 
@@ -23,10 +24,17 @@ CollisionWorld::CollisionWorld()
 // Update the lines.
 void CollisionWorld::updateLines()
 {
-//   detectIntersection();
+   detectIntersection();
+
+   int linesLength = lines.size();
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
-   qtree->descend(lines);
+   
+   int quadtreeCollisions = qtree->descend(lines);
+   printf("Total number of line-line collisions: %d\n", quadtreeCollisions);
+   quadtree_lineLineCollisions += quadtreeCollisions;
    delete(qtree);
+
+   assert(linesLength == lines.size());
    
    updatePosition();
    lineWallCollision();

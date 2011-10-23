@@ -4,6 +4,7 @@
 #include "Line.h"
 #include "IntersectionDetection.h"
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 class Quadtree{
@@ -20,9 +21,13 @@ class Quadtree{
   vector<Line *> lines;
 
   int divisionThresh;
+ protected:
+  Quadtree * parent;
+  vector<Line *> spanningLines;
+  
  public:
   Quadtree(double, double, double, double);
-  void descend(vector<Line *>);
+  int descend(vector<Line *>);
   ~Quadtree();
   
  private:
@@ -30,9 +35,16 @@ class Quadtree{
   Quadtree * two;
   Quadtree * three;
   Quadtree * four;
+
+  vector<Line*>* linesInTree;
+  double qtree_sw;
+  double qtree_ew;
+  double qtree_sh;
+  double qtree_eh;
+  
   void divideSelf();
   vector<Line*>* distributeLines(Quadtree *);
-  void detectCollisions();
+  int detectLineCollisions();
 };
 
 #endif /* QUADTREE_H*/

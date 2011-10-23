@@ -27,8 +27,13 @@ protected:
    // Record the total number of line line intersection
    unsigned int numLineLineCollisions;
 
+
 public:
    CollisionWorld();
+   
+   // Record the total number of line line intersections
+   // found by the quadtree implementation
+   unsigned int quadtree_lineLineCollisions;
 
    // Return the total number of lines in the box
    unsigned int getNumOfLines();

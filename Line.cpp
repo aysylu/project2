@@ -101,6 +101,8 @@ int main(int argc, char** argv)
         << " Line-Wall Collisions" << endl;
    cout << lineDemo->getNumLineLineCollisions()
         << " Line-Line Collisions" << endl;
+   cout << lineDemo->getQuadtreeLineLineCollisions()
+        << " Quadtree Line-Line Collisions" << endl;
 
 #ifndef PROFILE_BUILD
    cout << (end.time - start.time) / 1000.0
