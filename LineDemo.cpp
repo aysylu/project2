@@ -107,3 +107,8 @@ unsigned int LineDemo::getQuadtreeLineLineCollisions()
 {
   return collisionWorld->quadtree_lineLineCollisions;
 }
+
+unsigned int LineDemo::getQuadtreeLineWallCollisions()
+{
+  return collisionWorld->quadtree_lineWallCollisions;
+}

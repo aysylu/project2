@@ -35,6 +35,8 @@ public:
    // found by the quadtree implementation
    unsigned int quadtree_lineLineCollisions;
 
+   unsigned int quadtree_lineWallCollisions;
+
    // Return the total number of lines in the box
    unsigned int getNumOfLines();
 

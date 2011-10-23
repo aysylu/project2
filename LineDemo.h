@@ -53,6 +53,8 @@ public:
    // Get number of line-line collisions as found by Quadtree
    unsigned int getQuadtreeLineLineCollisions();
 
+   unsigned int getQuadtreeLineWallCollisions();
+
    // Line simulation update function
    bool update();
 };

@@ -29,9 +29,10 @@ void CollisionWorld::updateLines()
    int linesLength = lines.size();
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
    
-   int quadtreeCollisions = qtree->descend(lines);
+   COLLISION quadtreeCollisions = qtree->descend(lines);
 //   printf("Total number of line-line collisions: %d\n", quadtreeCollisions);
-   quadtree_lineLineCollisions += quadtreeCollisions;
+   quadtree_lineLineCollisions += quadtreeCollisions.numLineLineCollisions;
+   quadtree_lineWallCollisions += quadtreeCollisions.numLineWallCollisions;
    delete(qtree);
 
    assert(linesLength == lines.size());
