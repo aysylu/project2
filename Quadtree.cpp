@@ -1,41 +1,49 @@
 #include "Quadtree.h"
 
-Quadtree::Quadtree(int _start_width, int _end_width, int _start_height, int _end_height){
+Quadtree::Quadtree(double _start_width, double _end_width, double _start_height, double _end_height){
   start_width = _start_width;
   end_width = _end_width;
   start_height = _start_height;
   end_height = _end_height;
+  divisionThresh = 10;
+  one = NULL;
+  two = NULL;
+  three = NULL;
+  four = NULL;
+  //TODO: figure out what to do with init of lines
+  timeStep = 0.5;
+  numLineLineCollisions = 0;
 }
 
-void Quadtree::divideSelf(){
+void Quadtree::divideSelf() {
   // Width of first quadrant
-  int start_width_one = start_width;
-  int end_width_one = start_width + (end_width-start_width)/2;
+  double start_width_one = start_width;
+  double end_width_one = start_width + (end_width-start_width)/2;
   // Height of first quadrant
-  int start_height_one = start_height;
-  int end_height_one = start_height + (end_height-start_height)/2;
+  double start_height_one = start_height;
+  double end_height_one = start_height + (end_height-start_height)/2;
 
   // Width of second quadrant
-  int start_width_two = end_width_one+1;
-  int end_width_two = end_width;
+  double start_width_two = end_width_one;
+  double end_width_two = end_width;
   // Height of second quadrant
-  int start_height_two = start_height;
-  int end_height_two = start_height + (end_height-start_height)/2;
+  double start_height_two = start_height;
+  double end_height_two = start_height + (end_height-start_height)/2;
 
   // Width of third quadrant
-  int start_width_three = start_width;
-  int end_width_three = start_width + (end_width-start_width)/2;
+  double start_width_three = start_width;
+  double end_width_three = start_width + (end_width-start_width)/2;
   // Height of third quadrant
-  int start_height_three = start_height_one+1;
-  int end_height_three = end_height;
+  double start_height_three = end_height_one;
+  double end_height_three = end_height;
 
 
   // Width of fourth quadrant
-  int start_width_four = end_width_one+1;
-  int end_width_four = end_width;
+  double start_width_four = end_width_one;
+  double end_width_four = end_width;
   // Height of fourth quadrant
-  int start_height_four = start_height_one+1;
-  int end_height_four = end_height;
+  double start_height_four = end_height_one;
+  double end_height_four = end_height;
 
   Quadtree * _one = new Quadtree(start_width_one, end_width_one,
 				start_height_one, end_height_one);
@@ -55,15 +63,16 @@ vector<Line *> * Quadtree::distributeLines(Quadtree * qtree){
   vector<Line *> * linesInTree = new vector<Line*>();
   vector<Line*>::iterator it;
   
-  int qtree_sw = qtree->start_width;
-  int qtree_ew = qtree->end_width;
-  int qtree_sh = qtree->start_height;
-  int qtree_eh = qtree->end_height;
+  double qtree_sw = qtree->start_width;
+  double qtree_ew = qtree->end_width;
+  
+  double qtree_sh = qtree->start_height;
+  double qtree_eh = qtree->end_height;
 
-  printf("Coordinates for box:\n");
-  printf("(sw=%d , ew=%d), (sh=%d, eh=%d)\n", qtree_sw,
-	 qtree_ew, qtree_sh, qtree_eh);
-  printf("Includes lines:\n");
+  //printf("Coordinates for box:\n");
+  //printf("(sw=%f , ew=%f), (sh=%f, eh=%f)\n", qtree_sw,
+//	 qtree_ew, qtree_sh, qtree_eh);
+//  printf("Includes lines:\n");
   
   for (it=lines.begin(); it < lines.end(); it++){
     Line * line = *it;
@@ -75,8 +84,8 @@ vector<Line *> * Quadtree::distributeLines(Quadtree * qtree){
       // Assume that top left corner is the (0,0) coordinate 
       if(line->p1.y >= qtree_sh && line->p2.y <= qtree_eh){
 	// The line is inside the quadtree
-	printf("(x1=%f, y1=%f), (x2=%f, y2=%f)\n", line->p1.x,
-	       line->p1.y, line->p2.x, line->p2.y);
+	//printf("(x1=%f, y1=%f), (x2=%f, y2=%f)\n", line->p1.x,
+	//       line->p1.y, line->p2.x, line->p2.y);
 	
 	linesInTree->push_back(line);
       }
@@ -90,7 +99,7 @@ void Quadtree::descend(vector<Line *> _lines) {
   lines = _lines;
 
   if (lines.size() < divisionThresh) {
-    // detectCollisions(); //TODO: implement this
+    detectCollisions();
   } else {
     vector<Line *> * oneLines;
     vector<Line *> * twoLines;
@@ -99,17 +108,22 @@ void Quadtree::descend(vector<Line *> _lines) {
     
     divideSelf();
     
-    oneLines = distributeLines(one); //TODO: implement this
-    // one->descend(oneLines);
+    //printf("Lines size is %d\n", (int) lines.size());
+    oneLines = distributeLines(one);
+    one->descend(*oneLines);
 
+    //printf("Lines size is %d\n", (int) lines.size());
     twoLines = distributeLines(two);
-    // two->descend(twoLines);
+    two->descend(*twoLines);
 
+    //printf("Lines size is %d\n", (int) lines.size());
     threeLines = distributeLines(three);
-    // three->descend(threeLines);
+    three->descend(*threeLines);
 
+    //printf("Lines size is %d\n", (int) lines.size());
     fourLines = distributeLines(four);
-    // four->descend(fourLines);
+    four->descend(*fourLines);
+
   }
 
   // vector<Line *>::iterator it;
@@ -118,6 +132,23 @@ void Quadtree::descend(vector<Line *> _lines) {
   //     printf("p1 x, p1 y, p2 x, p2 y %f %f %f %f\n", l1->p1.x, l1->p1.y, l1->p2.x, l1->p2.y);
   //     printf("p1 = %llx\n", &(l1->p1));
   // }
+}
+
+void Quadtree::detectCollisions() {
+   vector<Line*>::iterator it1, it2;
+   for (it1 = lines.begin(); it1 != lines.end(); ++it1) {
+      Line *l1 = *it1;
+      for (it2 = it1 + 1; it2 != lines.end(); ++it2) {
+         Line *l2 = *it2;
+         IntersectionType intersectionType = intersect(l1, l2, timeStep);
+         if (intersectionType != NO_INTERSECTION) {
+printf("**********************************************************************\n");
+    printf("Num of collisions so far %d\n", numLineLineCollisions);
+            //collisionSolver(l1, l2, intersectionType);
+            numLineLineCollisions++;
+         }
+      }
+   }
 }
 
 Quadtree::~Quadtree() {

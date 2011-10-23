@@ -2,21 +2,26 @@
 #define QUADTREE_H
 
 #include "Line.h"
+#include "IntersectionDetection.h"
 #include <vector>
 using namespace std;
 
 class Quadtree{
-  int start_width;
-  int end_width;
+  double start_width;
+  double end_width;
 
-  int start_height;
-  int end_height;
+  double start_height;
+  double end_height;
+
+  double timeStep;
+
+  int numLineLineCollisions;
 
   vector<Line *> lines;
 
   int divisionThresh;
  public:
-  Quadtree(int, int, int, int);
+  Quadtree(double, double, double, double);
   void descend(vector<Line *>);
   ~Quadtree();
   
@@ -27,6 +32,7 @@ class Quadtree{
   Quadtree * four;
   void divideSelf();
   vector<Line*>* distributeLines(Quadtree *);
+  void detectCollisions();
 };
 
 #endif /* QUADTREE_H*/
