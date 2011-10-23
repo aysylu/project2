@@ -30,7 +30,7 @@ void CollisionWorld::updateLines()
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
    
    int quadtreeCollisions = qtree->descend(lines);
-   printf("Total number of line-line collisions: %d\n", quadtreeCollisions);
+//   printf("Total number of line-line collisions: %d\n", quadtreeCollisions);
    quadtree_lineLineCollisions += quadtreeCollisions;
    delete(qtree);
 
@@ -206,6 +206,9 @@ Line *CollisionWorld::getLine(unsigned int index)
 // Delete all lines in the box
 void CollisionWorld::deleteLines()
 {
+   for (vector<Line*>::iterator it = lines.begin(); it < lines.end(); it++) {
+     delete *it;
+   }
    lines.clear();
 }
 
