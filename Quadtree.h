@@ -44,7 +44,8 @@ class Quadtree{
   
   void divideSelf();
   vector<Line*>* distributeLines(Quadtree *);
-  int detectLineCollisions();
+  int detectLineLineCollisions(vector<Line*> *);
+  //int detectLineWallCollisions(vector<Line*> *);
 };
 
 #endif /* QUADTREE_H*/
