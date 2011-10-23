@@ -14,7 +14,6 @@
 bool LineDemo::update()
 {
    count++;
-printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
    collisionWorld->updateLines();
    if (count > numFrames) {
       return false;
@@ -109,7 +108,3 @@ unsigned int LineDemo::getQuadtreeLineLineCollisions()
   return collisionWorld->quadtree_lineLineCollisions;
 }
 
-unsigned int LineDemo::getQuadtreeLineWallCollisions()
-{
-  return collisionWorld->quadtree_lineWallCollisions;
-}
