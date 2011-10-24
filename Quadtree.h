@@ -58,6 +58,7 @@ class Quadtree{
   int detectSpanningLineLineCollisions(vector<Line*> *, vector<Line*> *,
                     vector<Line*> *,vector<Line*> *, vector<Line*> *);
   int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
+  void collisionSolver(Line *, Line *, IntersectionType);
 };
 
 #endif /* QUADTREE_H*/

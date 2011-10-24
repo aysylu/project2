@@ -313,6 +313,7 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
          Line *l2 = *_it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
+            collisionSolver(l1, l2, intersectionType);
             numCollisions++;
          }
       }
@@ -343,6 +344,7 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
          Line *l2 = *it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
+            collisionSolver(l1, l2, intersectionType);
             totalLineLineCollisions++;
          }
       }
@@ -350,6 +352,67 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    return totalLineLineCollisions;
 }
 
+void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
+                                     intersectionType)
+{
+   // Despite our efforts to determine whether lines will intersect ahead of
+   // time (and to modify their velocities appropriately), our simplified model
+   // can sometimes cause lines to intersect.  In such a case, we compute
+   // velocities so that the two lines can get unstuck in the fastest possible
+   // way, while still conserving momentum and kinetic energy.
+   if (intersectionType == ALREADY_INTERSECTED) {
+      Vec p = getIntersectionPoint(l1->p1, l1->p2, l2->p1, l2->p2);
+
+      if ((l1->p1 - p).length() < (l1->p2 - p).length()) {
+         l1->vel = (l1->p2 - p).normalize() * l1->vel.length();
+      } else {
+         l1->vel = (l1->p1 - p).normalize() * l1->vel.length();
+      }
+      if ((l2->p1 - p).length() < (l2->p2 - p).length()) {
+         l2->vel = (l2->p2 - p).normalize() * l2->vel.length();
+      } else {
+         l2->vel = (l2->p1 - p).normalize() * l2->vel.length();
+      }
+      return;
+   }
+
+   // Compute the collision face/normal vectors
+   Vec face;
+   Vec normal;
+   if (intersectionType == L1_WITH_L2) {
+      Vec v(*l2);
+      face = v.normalize();
+   } else {
+      Vec v(*l1);
+      face = v.normalize();
+   }
+   normal = face.orthogonal();
+
+   // Obtain each line's velocity components with respect to the collision
+   // face/normal vectors.
+   double v1Face = l1->vel.dotProduct(face);
+   double v2Face = l2->vel.dotProduct(face);
+   double v1Normal = l1->vel.dotProduct(normal);
+   double v2Normal = l2->vel.dotProduct(normal);
+
+   // Compute the mass of each line (we simply use its length).
+   double m1 = (l1->p1 - l1->p2).length();
+   double m2 = (l2->p1 - l2->p2).length();
+
+   // Perform the collision calculation (computes the new velocities along the
+   // direction normal to the collision face such that momentum and kinetic
+   // energy are conserved).
+   double newV1Normal = ((m1 - m2) / (m1 + m2)) * v1Normal +
+                        (2 * m2 / (m1 + m2)) * v2Normal;
+   double newV2Normal = (2 * m1 / (m1 + m2)) * v1Normal +
+                        ((m2 - m1) / (m2 + m1)) * v2Normal;
+
+   // Combine the resulting velocities.
+   l1->vel = normal * newV1Normal + face * v1Face;
+   l2->vel = normal * newV2Normal + face * v2Face;
+
+   return;
+}
 Quadtree::~Quadtree() {
   if (one != NULL) {
     delete one;
