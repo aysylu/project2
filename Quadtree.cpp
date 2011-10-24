@@ -223,10 +223,10 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
    int numCollisions = 0;
 
    // Pairwise collision detection between members of _lines and members of otherLines
-   for (_it1 = _lines->begin(); _it1 != _lines->end(); ++_it1) {
-      Line *l1 = *_it1;
-      for (_it2 = otherLines->begin(); _it2 != otherLines->end(); ++_it2) {
-         Line *l2 = *_it2;
+   cilk_for (int i = 0; i < _lines->size(); ++i) {
+      Line *l1 = _lines->at(i);
+      for (int j = 0; j < otherLines->size(); ++j) {
+         Line *l2 = otherLines->at(j);
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
 	   // If the lines are intersecting, add them to the intersectedPairs list for
@@ -261,10 +261,10 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    int totalLineLineCollisions = 0;
 
    // Checks if any pair of lines in _lines has a collision. This is O(n^2).
-   for (it1 = _lines->begin(); it1 != _lines->end(); ++it1) {
-      Line *l1 = *it1;
-      for (it2 = it1 + 1; it2 != _lines->end(); ++it2) {
-         Line *l2 = *it2;
+   cilk_for (int i = 0; i < _lines->size(); ++i) {
+      Line *l1 = _lines->at(i);
+      for (int j = i + 1; j < _lines->size(); ++j) {
+         Line *l2 = _lines->at(j);
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
   	    // If the lines are intersecting, add them to the intersectedPairs list for
