@@ -19,6 +19,9 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   qtree_sh = 0;
   qtree_eh = 0;
 
+  maxDepth = (unsigned int)-1;
+  currentDepth = 0;
+
   timeStep = 0.5;
   numLineLineCollisions = 0;
 }
@@ -66,10 +69,89 @@ void Quadtree::divideSelf() {
   three = _three;
   four = _four;
 
+  one->currentDepth = currentDepth + 1;
+  two->currentDepth = currentDepth + 1;
+  three->currentDepth = currentDepth + 1;
+  four->currentDepth = currentDepth + 1;
+  
   one->parent = this;
   two->parent = this;
   three->parent = this;
   four->parent = this;
+}
+
+void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtree * qtreeThree, Quadtree * qtreeFour,
+			       vector<Line*> divideLines){
+  vector<Line*>::iterator it;
+  
+  double qtreeOne_sw = qtreeOne->start_width;
+  double qtreeOne_ew = qtreeOne->end_width;
+  
+  double qtreeOne_sh = qtreeOne->start_height;
+  double qtreeOne_eh = qtreeOne->end_height;
+
+  double qtreeTwo_sw = qtreeTwo->start_width;
+  double qtreeTwo_ew = qtreeTwo->end_width;
+  
+  double qtreeTwo_sh = qtreeTwo->start_height;
+  double qtreeTwo_eh = qtreeTwo->end_height;
+
+  double qtreeThree_sw = qtreeThree->start_width;
+  double qtreeThree_ew = qtreeThree->end_width;
+  
+  double qtreeThree_sh = qtreeThree->start_height;
+  double qtreeThree_eh = qtreeThree->end_height;
+
+  double qtreeFour_sw = qtreeFour->start_width;
+  double qtreeFour_ew = qtreeFour->end_width;
+  
+  double qtreeFour_sh = qtreeFour->start_height;
+  double qtreeFour_eh = qtreeFour->end_height;
+
+  for(it=divideLines.begin(); it < divideLines.end(); it++){
+    Line * line = *it;
+    bool assignedQuadtree = false;
+
+    // Is line in qtreeOne?
+    if((line->p1.x >= qtreeOne_sw && line->p1.x <= qtreeOne_ew) &&
+       (line->p1.y >= qtreeOne_sh && line->p1.y < qtreeOne_eh)){
+      if((line->p2.x >= qtreeOne_sw && line->p2.x <= qtreeOne_ew) &&
+	 (line->p2.y >= qtreeOne_sh && line->p2.y < qtreeOne_eh)){
+	assignedQuadtree = true;
+	qtreeOne->lines.push_back(line);
+      }
+    }
+    // Is line in qtreeTwoOne?
+    else if((line->p1.x >= qtreeTwo_sw && line->p1.x <= qtreeTwo_ew) &&
+       (line->p1.y >= qtreeTwo_sh && line->p1.y < qtreeTwo_eh)){
+      if((line->p2.x >= qtreeTwo_sw && line->p2.x <= qtreeTwo_ew) &&
+	 (line->p2.y >= qtreeTwo_sh && line->p2.y < qtreeTwo_eh)){
+	assignedQuadtree = true;
+	qtreeTwo->lines.push_back(line);
+      }
+    }
+    // Is line in qtreeThree?
+    else if((line->p1.x >= qtreeThree_sw && line->p1.x <= qtreeThree_ew) &&
+       (line->p1.y >= qtreeThree_sh && line->p1.y < qtreeThree_eh)){
+      if((line->p2.x >= qtreeThree_sw && line->p2.x <= qtreeThree_ew) &&
+	 (line->p2.y >= qtreeThree_sh && line->p2.y < qtreeThree_eh)){
+	assignedQuadtree = true;
+	qtreeThree->lines.push_back(line);
+      }
+    }
+    // Is line in qtreeFour?
+    else if((line->p1.x >= qtreeFour_sw && line->p1.x <= qtreeFour_ew) &&
+       (line->p1.y >= qtreeFour_sh && line->p1.y < qtreeFour_eh)){
+      if((line->p2.x >= qtreeFour_sw && line->p2.x <= qtreeFour_ew) &&
+	 (line->p2.y >= qtreeFour_sh && line->p2.y < qtreeFour_eh)){
+	assignedQuadtree = true;
+	qtreeFour->lines.push_back(line);
+      }
+    }
+    if(assignedQuadtree == false){
+      spanningLines.push_back(line);
+    }
+  }
 }
 
 vector<Line *> * Quadtree::distributeLinesOne(Quadtree * qtree){
@@ -186,38 +268,36 @@ vector<Line *> * Quadtree::distributeLinesFour(Quadtree * qtree){
   return linesInTree;
 }
 
-int Quadtree::descend(vector<Line *> _lines) {
-  lines = _lines;
+// int Quadtree::descend(vector<Line *> _lines) {
+int Quadtree::descend(){
+  // lines = _lines;
   int totalLineLineCollisions=0;
   
-  if (lines.size() < divisionThresh) {
-    totalLineLineCollisions = detectLineLineCollisions(&lines);
+  if (lines.size() < divisionThresh ||
+      currentDepth >= maxDepth) {
+       totalLineLineCollisions = detectLineLineCollisions(&lines);
   } else {
-
-    vector<Line *> * oneLines;
-    vector<Line *> * twoLines;
-    vector<Line *> * threeLines;
-    vector<Line *> * fourLines;
-    
     divideSelf();
     
-    oneLines = distributeLinesOne(one);
-    twoLines = distributeLinesTwo(two);
-    threeLines = distributeLinesThree(three);
-    fourLines = distributeLinesFour(four);
+    distributeLines(one, two, three, four, lines);
 
     if (spanningLines.size() > 0) {
       totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
-                                  oneLines, twoLines, threeLines, fourLines);
+                                  &one->lines, &two->lines, &three->lines, &four->lines);
     }
+      totalLineLineCollisions += one->descend();
+      totalLineLineCollisions += two->descend();
+      totalLineLineCollisions += three->descend();
+      totalLineLineCollisions += four->descend();
 
-      totalLineLineCollisions += one->descend(*oneLines);
+      lines.clear();
+      lines.insert(lines.end(), one->lines.begin(), one->lines.end());
+      lines.insert(lines.end(), two->lines.begin(), two->lines.end());
+      lines.insert(lines.end(), three->lines.begin(), three->lines.end());
+      lines.insert(lines.end(), four->lines.begin(), four->lines.end());
+      lines.insert(lines.end(), spanningLines.begin(), spanningLines.end());
 
-      totalLineLineCollisions += two->descend(*twoLines);
 
-      totalLineLineCollisions += three->descend(*threeLines);
-
-      totalLineLineCollisions += four->descend(*fourLines);
   }
   
   return totalLineLineCollisions;

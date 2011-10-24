@@ -27,10 +27,15 @@ void CollisionWorld::updateLines()
    int linesLength = lines.size();
 
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
+   qtree->lines = lines;
    
-   int quadtreeCollisions = qtree->descend(lines);
+   // int quadtreeCollisions = qtree->descend(lines);
+   int quadtreeCollisions = qtree->descend();
    quadtree_lineLineCollisions += quadtreeCollisions;
+   lines = qtree->lines;
    delete(qtree);
+
+   printf("linesLength:%d, lines.size(): %d\n", linesLength, (int)lines.size());
 
    assert(linesLength == lines.size());
 //   detectIntersection();

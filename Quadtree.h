@@ -18,7 +18,8 @@ class Quadtree{
 
   int numLineLineCollisions;
 
-  vector<Line *> lines;
+  unsigned int maxDepth;
+  unsigned int currentDepth;
 
   int divisionThresh;
  protected:
@@ -27,7 +28,8 @@ class Quadtree{
   
  public:
   Quadtree(double, double, double, double);
-  int descend(vector<Line *>);
+  int descend();
+  vector<Line *> lines;
   ~Quadtree();
   
  private:
@@ -43,6 +45,9 @@ class Quadtree{
   double qtree_eh;
   
   void divideSelf();
+
+  void distributeLines(Quadtree *, Quadtree *, Quadtree *, Quadtree *,
+		       vector<Line*>);
 
   vector<Line*>* distributeLinesOne(Quadtree *);
   vector<Line*>* distributeLinesTwo(Quadtree *);
