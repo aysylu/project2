@@ -7,12 +7,13 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   end_height = _end_height;
   
   divisionThresh = 15;
+
+  intersectedPairs = new list<IntersectionInfo>();
   
   one = NULL;
   two = NULL;
   three = NULL;
   four = NULL;
-  linesInTree = NULL;
   parent = NULL;
   
   qtree_sw = 0;
@@ -156,128 +157,17 @@ void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtre
   }
 }
 
-vector<Line *> * Quadtree::distributeLinesOne(Quadtree * qtree){
-  vector<Line *> * linesInTree = new vector<Line*>();
-  vector<Line*>::iterator it;
-  
-  double qtree_sw = qtree->start_width;
-  double qtree_ew = qtree->end_width;
-  
-  double qtree_sh = qtree->start_height;
-  double qtree_eh = qtree->end_height;
-
-  for (it=lines.begin(); it < lines.end(); it++){
-    Line * line = *it;
-    if((line->p1.x >= qtree_sw && line->p1.x <= qtree_ew) &&
-       (line->p1.y >= qtree_sh && line->p1.y < qtree_eh)){
-      // Check if the second point is in the box
-      if((line->p2.x >= qtree_sw && line->p2.x <= qtree_ew) &&
-	 (line->p2.y >= qtree_sh && line->p2.y < qtree_eh)){
-	// The line is in the box...
-
-	linesInTree->push_back(line);
-      } else {
-        // The line spans more than one quadtree
-        qtree->parent->spanningLines.push_back(line);
-      }
-    }
-  }
-  return linesInTree;
-}
-
-vector<Line *> * Quadtree::distributeLinesTwo(Quadtree * qtree){
-  vector<Line *> * linesInTree = new vector<Line*>();
-  vector<Line*>::iterator it;
-  
-  double qtree_sw = qtree->start_width;
-  double qtree_ew = qtree->end_width;
-  
-  double qtree_sh = qtree->start_height;
-  double qtree_eh = qtree->end_height;
-
-  for (it=lines.begin(); it < lines.end(); it++){
-    Line * line = *it;
-    if((line->p1.x > qtree_sw && line->p1.x <= qtree_ew) &&
-       (line->p1.y >= qtree_sh && line->p1.y <= qtree_eh)){
-      // Check if the second point is in the box
-      if((line->p2.x > qtree_sw && line->p2.x <= qtree_ew) &&
-	 (line->p2.y >= qtree_sh && line->p2.y <= qtree_eh)){
-	// The line is in the box...
-	linesInTree->push_back(line);
-      } else {
-        // The line spans more than one quadtree
-        qtree->parent->spanningLines.push_back(line);
-      }
-    }
-  }
-  return linesInTree;
-}
-
-vector<Line *> * Quadtree::distributeLinesThree(Quadtree * qtree){
-  vector<Line *> * linesInTree = new vector<Line*>();
-  vector<Line*>::iterator it;
-  
-  double qtree_sw = qtree->start_width;
-  double qtree_ew = qtree->end_width;
-  
-  double qtree_sh = qtree->start_height;
-  double qtree_eh = qtree->end_height;
-
-  for (it=lines.begin(); it < lines.end(); it++){
-    Line * line = *it;
-
-    if((line->p1.x >= qtree_sw && line->p1.x < qtree_ew) &&
-       (line->p1.y >= qtree_sh && line->p1.y <= qtree_eh)){
-      // Check if the second point is in the box
-      if((line->p2.x >= qtree_sw && line->p2.x < qtree_ew) &&
-	 (line->p2.y >= qtree_sh && line->p2.y <= qtree_eh)){
-	// The line is in the box...
-	linesInTree->push_back(line);
-      } else {
-        // The line spans more than one quadtree
-        qtree->parent->spanningLines.push_back(line);
-      }
-   }
-  }
-  return linesInTree;
-}
-
-vector<Line *> * Quadtree::distributeLinesFour(Quadtree * qtree){
-  vector<Line *> * linesInTree = new vector<Line*>();
-  vector<Line*>::iterator it;
-  
-  double qtree_sw = qtree->start_width;
-  double qtree_ew = qtree->end_width;
-  
-  double qtree_sh = qtree->start_height;
-  double qtree_eh = qtree->end_height;
-
-  for (it=lines.begin(); it < lines.end(); it++){
-    Line * line = *it;
-    if((line->p1.x >= qtree_sw && line->p1.x <= qtree_ew) &&
-       (line->p1.y > qtree_sh && line->p1.y <= qtree_eh)){
-      // Check if the second point is in the box
-      if((line->p2.x >= qtree_sw && line->p2.x <= qtree_ew) &&
-	 (line->p2.y > qtree_sh && line->p2.y <= qtree_eh)){
-	// The line is in the box...
-	linesInTree->push_back(line);
-      } else {
-        // The line spans more than one quadtree
-        qtree->parent->spanningLines.push_back(line);
-      }
-    }
-  }
-  return linesInTree;
-}
-
-// int Quadtree::descend(vector<Line *> _lines) {
 int Quadtree::descend(){
-  // lines = _lines;
   int totalLineLineCollisions=0;
   
   if (lines.size() < divisionThresh ||
       currentDepth >= maxDepth) {
        totalLineLineCollisions = detectLineLineCollisions(&lines);
+       list<IntersectionInfo>::iterator it;
+       for (it = intersectedPairs->begin(); it != intersectedPairs->end(); ++it) {
+         IntersectionInfo pair = *it;
+         collisionSolver(pair.l1, pair.l2, pair.intersectionType);
+       }
   } else {
     divideSelf();
     
@@ -286,6 +176,11 @@ int Quadtree::descend(){
     if (spanningLines.size() > 0) {
       totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
                                   &one->lines, &two->lines, &three->lines, &four->lines);
+       list<IntersectionInfo>::iterator it;
+       for (it = intersectedPairs->begin(); it != intersectedPairs->end(); ++it) {
+         IntersectionInfo pair = *it;
+         collisionSolver(pair.l1, pair.l2, pair.intersectionType);
+       }
     }
       totalLineLineCollisions += one->descend();
       totalLineLineCollisions += two->descend();
@@ -315,7 +210,9 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
          Line *l2 = *_it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
-            collisionSolver(l1, l2, intersectionType);
+           // collisionSolver(l1, l2, intersectionType);
+           //add to the intersectionInfo list
+           intersectedPairs->push_back(IntersectionInfo(l1, l2, intersectionType));
             numCollisions++;
          }
       }
@@ -346,7 +243,8 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
          Line *l2 = *it2;
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
-            collisionSolver(l1, l2, intersectionType);
+            intersectedPairs->push_back(IntersectionInfo(l1, l2, intersectionType));
+            //collisionSolver(l1, l2, intersectionType);
             totalLineLineCollisions++;
          }
       }
@@ -431,4 +329,6 @@ Quadtree::~Quadtree() {
   if (four != NULL) {
     delete four;
   }
+
+  delete intersectedPairs;
 }

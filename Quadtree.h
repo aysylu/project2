@@ -5,10 +5,22 @@
 #include "IntersectionDetection.h"
 #include <vector>
 #include <algorithm>
-
+#include <list>
 using namespace std;
 
 extern unordered_map<Line*, double> lineCache;
+
+struct IntersectionInfo {
+  Line *l1;
+  Line *l2;
+  IntersectionType intersectionType;
+
+  IntersectionInfo(Line *l1, Line *l2, IntersectionType intersectionType) {
+    this->l1 = l1;
+    this->l2 = l2;
+    this->intersectionType = intersectionType;
+  }
+};
 
 class Quadtree{
   double start_width;
@@ -41,11 +53,12 @@ class Quadtree{
   Quadtree * three;
   Quadtree * four;
 
-  vector<Line*>* linesInTree;
   double qtree_sw;
   double qtree_ew;
   double qtree_sh;
   double qtree_eh;
+
+  list<IntersectionInfo> * intersectedPairs;
   
   void divideSelf();
 
