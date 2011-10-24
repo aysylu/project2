@@ -35,9 +35,7 @@ void CollisionWorld::updateLines()
    lines = qtree->lines;
    delete(qtree);
 
-   printf("linesLength:%d, lines.size(): %d\n", linesLength, (int)lines.size());
-
-   assert(linesLength == lines.size());
+//   assert(linesLength == lines.size());
 //   detectIntersection();
    updatePosition();
    lineWallCollision();
