@@ -3,6 +3,7 @@
 
 #include "Line.h"
 #include "CollisionWorld.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -55,6 +56,8 @@ public:
 
    // Line simulation update function
    bool update();
+
+
 };
 
 #endif /* LINE_DEMO_H */

@@ -5,7 +5,7 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   end_width = _end_width;
   start_height = _start_height;
   end_height = _end_height;
-  divisionThresh = 7;
+  divisionThresh = 15;
   one = NULL;
   two = NULL;
   three = NULL;
@@ -19,7 +19,7 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   qtree_sh = 0;
   qtree_eh = 0;
 
-  maxDepth = (unsigned int)-1;
+  maxDepth = 3;
   currentDepth = 0;
 
   timeStep = 0.5;
@@ -360,6 +360,7 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // can sometimes cause lines to intersect.  In such a case, we compute
    // velocities so that the two lines can get unstuck in the fastest possible
    // way, while still conserving momentum and kinetic energy.
+   extern unordered_map<Line*, double> lengthCache;
    if (intersectionType == ALREADY_INTERSECTED) {
       Vec p = getIntersectionPoint(l1->p1, l1->p2, l2->p1, l2->p2);
 
@@ -396,8 +397,10 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    double v2Normal = l2->vel.dotProduct(normal);
 
    // Compute the mass of each line (we simply use its length).
-   double m1 = (l1->p1 - l1->p2).length();
-   double m2 = (l2->p1 - l2->p2).length();
+   // double m1 = (l1->p1 - l1->p2).length();
+   // double m2 = (l2->p1 - l2->p2).length();
+   double m1 = lengthCache[l1];
+   double m2 = lengthCache[l2];
 
    // Perform the collision calculation (computes the new velocities along the
    // direction normal to the collision face such that momentum and kinetic
@@ -426,5 +429,4 @@ Quadtree::~Quadtree() {
   if (four != NULL) {
     delete four;
   }
-  
 }

@@ -10,6 +10,8 @@
 #include "Line.h"
 #include "LineDemo.h"
 
+// map<Line*, double> lengthCache;
+unordered_map<Line *, double> lengthCache;
 // The main simulation loop
 bool LineDemo::update()
 {
@@ -28,6 +30,7 @@ void LineDemo::createLines()
    double px1, py1, px2, py2, vx, vy;
    int isGray;
    FILE *fin;
+   
    fin = fopen("line.in", "r");
    assert(fin != NULL);
 
@@ -47,6 +50,8 @@ void LineDemo::createLines()
       line->isGray = isGray;
 
       collisionWorld->addLine(line);
+      lengthCache.insert(pair<Line*, double>(line, (line->p1 - line->p2).length()));
+      //lengthCache[line] = (line->p1 - line->p2).length();
    }
    fclose(fin);
 }

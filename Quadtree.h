@@ -5,7 +5,10 @@
 #include "IntersectionDetection.h"
 #include <vector>
 #include <algorithm>
+
 using namespace std;
+
+extern unordered_map<Line*, double> lineCache;
 
 class Quadtree{
   double start_width;
