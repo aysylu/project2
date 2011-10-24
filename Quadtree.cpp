@@ -205,12 +205,12 @@ int Quadtree::descend(){
       totalLineLineCollisions += four->descend();
 
       // Aggregate the newly-updated lines into the parent's line vector
-      lines.clear();
-      lines.insert(lines.end(), one->lines.begin(), one->lines.end());
-      lines.insert(lines.end(), two->lines.begin(), two->lines.end());
-      lines.insert(lines.end(), three->lines.begin(), three->lines.end());
-      lines.insert(lines.end(), four->lines.begin(), four->lines.end());
-      lines.insert(lines.end(), spanningLines.begin(), spanningLines.end());
+//      lines.clear();
+//      lines.insert(lines.end(), one->lines.begin(), one->lines.end());
+//      lines.insert(lines.end(), two->lines.begin(), two->lines.end());
+//      lines.insert(lines.end(), three->lines.begin(), three->lines.end());
+//      lines.insert(lines.end(), four->lines.begin(), four->lines.end());
+//      lines.insert(lines.end(), spanningLines.begin(), spanningLines.end());
 
   }
   
