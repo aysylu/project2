@@ -1,9 +1,6 @@
 #ifndef LINE_H
 #define LINE_H
 
-//#include <map>
-
-#include <unordered_map>
 #include "Vec.h"
 
 /* Lines' coordinates are stored in a box with these bounds
@@ -25,6 +22,7 @@ struct Line {
    Vec p1;
    Vec p2;
    Vec vel;
+   double mass;
    bool isGray;
 };
 

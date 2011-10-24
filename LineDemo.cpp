@@ -10,8 +10,6 @@
 #include "Line.h"
 #include "LineDemo.h"
 
-// map<Line*, double> lengthCache;
-unordered_map<Line *, double> lengthCache;
 // The main simulation loop
 bool LineDemo::update()
 {
@@ -52,7 +50,7 @@ void LineDemo::createLines()
       collisionWorld->addLine(line);
 
       // Add the line's length to the cache of line lengths.
-      lengthCache.insert(pair<Line*, double>(line, (line->p1 - line->p2).length()));
+      line->mass = (line->p1 - line->p2).length();
    }
    fclose(fin);
 }
