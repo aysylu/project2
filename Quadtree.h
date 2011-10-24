@@ -3,12 +3,12 @@
 
 #include "Line.h"
 #include "IntersectionDetection.h"
+#include <cilk/cilk.h>
+#include <cilk/reducer_list.h>
 #include <vector>
 #include <algorithm>
 #include <list>
 using namespace std;
-
-extern unordered_map<Line*, double> lineCache;
 
 struct IntersectionInfo {
   Line *l1;
@@ -58,7 +58,7 @@ class Quadtree{
   double qtree_sh;
   double qtree_eh;
 
-  list<IntersectionInfo> * intersectedPairs;
+  cilk::reducer_list_append<IntersectionInfo> * intersectedPairs;
   
   void divideSelf();
 

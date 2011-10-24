@@ -8,7 +8,7 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   
   divisionThresh = 15;
 
-  intersectedPairs = new list<IntersectionInfo>();
+  intersectedPairs = new cilk::reducer_list_append<IntersectionInfo>();
   
   one = NULL;
   two = NULL;
@@ -173,8 +173,8 @@ int Quadtree::descend(){
   if (lines.size() < divisionThresh ||
       currentDepth >= maxDepth) {
        totalLineLineCollisions = detectLineLineCollisions(&lines);
-       list<IntersectionInfo>::iterator it;
-       for (it = intersectedPairs->begin(); it != intersectedPairs->end(); ++it) {
+       list<IntersectionInfo> intersectList = intersectedPairs->get_value();
+       for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
          IntersectionInfo pair = *it;
          collisionSolver(pair.l1, pair.l2, pair.intersectionType);
        }
@@ -190,11 +190,10 @@ int Quadtree::descend(){
     if (spanningLines.size() > 0) {
       totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
                                   &one->lines, &two->lines, &three->lines, &four->lines);
-       list<IntersectionInfo>::iterator it;
-
+       list<IntersectionInfo> intersectList = intersectedPairs->get_value();
        // Once we find the collisions, we update the velocities of the lines to solve the
        // collisions.
-       for (it = intersectedPairs->begin(); it != intersectedPairs->end(); ++it) {
+       for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
          IntersectionInfo pair = *it;
          collisionSolver(pair.l1, pair.l2, pair.intersectionType);
        }
@@ -249,10 +248,10 @@ int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _spanningLines,
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesOne);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesTwo);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesThree);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesFour);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesOne);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesTwo);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesThree);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesFour);
    totalLineLineCollisions += detectLineLineCollisions(_spanningLines);
    return totalLineLineCollisions;
 }
@@ -286,7 +285,6 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // can sometimes cause lines to intersect.  In such a case, we compute
    // velocities so that the two lines can get unstuck in the fastest possible
    // way, while still conserving momentum and kinetic energy.
-   extern unordered_map<Line*, double> lengthCache;
    if (intersectionType == ALREADY_INTERSECTED) {
       Vec p = getIntersectionPoint(l1->p1, l1->p2, l2->p1, l2->p2);
 
@@ -325,8 +323,8 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // Compute the mass of each line (we simply use its length).
    // Retrieve the length of the line from the cache of line lengths computed
    // in createLines() in LineDemo.cpp
-   double m1 = lengthCache[l1];
-   double m2 = lengthCache[l2];
+   double m1 = l1->mass;
+   double m2 = l2->mass;
 
    // Perform the collision calculation (computes the new velocities along the
    // direction normal to the collision face such that momentum and kinetic
