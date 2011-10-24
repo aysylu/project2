@@ -5,7 +5,7 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   end_width = _end_width;
   start_height = _start_height;
   end_height = _end_height;
-  divisionThresh = 3;
+  divisionThresh = 7;
   one = NULL;
   two = NULL;
   three = NULL;

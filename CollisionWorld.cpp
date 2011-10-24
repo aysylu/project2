@@ -33,7 +33,7 @@ void CollisionWorld::updateLines()
    delete(qtree);
 
    assert(linesLength == lines.size());
-   detectIntersection();
+//   detectIntersection();
    updatePosition();
    lineWallCollision();
 }
