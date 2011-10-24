@@ -249,10 +249,10 @@ int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _spanningLines,
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesOne);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesTwo);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesThree);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _spanningLinesFour);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesOne);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesTwo);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesThree);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesFour);
    totalLineLineCollisions += detectLineLineCollisions(_spanningLines);
    return totalLineLineCollisions;
 }
@@ -286,7 +286,6 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // can sometimes cause lines to intersect.  In such a case, we compute
    // velocities so that the two lines can get unstuck in the fastest possible
    // way, while still conserving momentum and kinetic energy.
-   extern unordered_map<Line*, double> lengthCache;
    if (intersectionType == ALREADY_INTERSECTED) {
       Vec p = getIntersectionPoint(l1->p1, l1->p2, l2->p1, l2->p2);
 
@@ -325,8 +324,8 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // Compute the mass of each line (we simply use its length).
    // Retrieve the length of the line from the cache of line lengths computed
    // in createLines() in LineDemo.cpp
-   double m1 = lengthCache[l1];
-   double m2 = lengthCache[l2];
+   double m1 = l1->mass;
+   double m2= l2->mass;
 
    // Perform the collision calculation (computes the new velocities along the
    // direction normal to the collision face such that momentum and kinetic

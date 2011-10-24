@@ -4,11 +4,8 @@
 #include "Line.h"
 #include "IntersectionDetection.h"
 #include <vector>
-#include <algorithm>
 #include <list>
 using namespace std;
-
-extern unordered_map<Line*, double> lineCache;
 
 struct IntersectionInfo {
   Line *l1;
