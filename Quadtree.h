@@ -5,6 +5,7 @@
 #include "IntersectionDetection.h"
 #include <cilk/cilk.h>
 #include <cilk/reducer_list.h>
+#include <cilk/reducer_opadd.h>
 #include <vector>
 #include <algorithm>
 #include <list>
@@ -31,7 +32,7 @@ class Quadtree{
 
   double timeStep;
 
-  int numLineLineCollisions;
+
 
   unsigned int maxDepth;
   unsigned int currentDepth;
@@ -43,9 +44,11 @@ class Quadtree{
   
  public:
   Quadtree(double, double, double, double);
-  int descend();
+  /* int descend(); */
+  void descend();
   vector<Line *> lines;
   ~Quadtree();
+  static cilk::reducer_opadd<int> numLineLineCollisions;
   
  private:
   Quadtree * one;

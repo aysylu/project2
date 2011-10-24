@@ -28,7 +28,7 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   currentDepth = 0;
 
   timeStep = 0.5;
-  numLineLineCollisions = 0;
+  //numLineLineCollisions = 0;
 }
 
 void Quadtree::divideSelf() {
@@ -164,7 +164,7 @@ void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtre
   }
 }
 
-int Quadtree::descend(){
+void Quadtree::descend(){
   int totalLineLineCollisions=0;
 
   // If we have at least divisionThresh lines in our Quadtree, do not descend any further.
@@ -173,6 +173,9 @@ int Quadtree::descend(){
   if (lines.size() < divisionThresh ||
       currentDepth >= maxDepth) {
        totalLineLineCollisions = detectLineLineCollisions(&lines);
+       
+       this->numLineLineCollisions += totalLineLineCollisions;
+       
        list<IntersectionInfo> intersectList = intersectedPairs->get_value();
        for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
          IntersectionInfo pair = *it;
@@ -190,6 +193,9 @@ int Quadtree::descend(){
     if (spanningLines.size() > 0) {
       totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
                                   &one->lines, &two->lines, &three->lines, &four->lines);
+      
+      this->numLineLineCollisions += totalLineLineCollisions;
+      
        list<IntersectionInfo> intersectList = intersectedPairs->get_value();
        // Once we find the collisions, we update the velocities of the lines to solve the
        // collisions.
@@ -199,22 +205,23 @@ int Quadtree::descend(){
        }
     }
     // Recurse into the children, detecting collisions among their lines.
-      totalLineLineCollisions += one->descend();
-      totalLineLineCollisions += two->descend();
-      totalLineLineCollisions += three->descend();
-      totalLineLineCollisions += four->descend();
-
-      // Aggregate the newly-updated lines into the parent's line vector
-//      lines.clear();
-//      lines.insert(lines.end(), one->lines.begin(), one->lines.end());
-//      lines.insert(lines.end(), two->lines.begin(), two->lines.end());
-//      lines.insert(lines.end(), three->lines.begin(), three->lines.end());
-//      lines.insert(lines.end(), four->lines.begin(), four->lines.end());
-//      lines.insert(lines.end(), spanningLines.begin(), spanningLines.end());
-
+      // totalLineLineCollisions += one->descend();
+      // totalLineLineCollisions += two->descend();
+      // totalLineLineCollisions += three->descend();
+      // totalLineLineCollisions += four->descend();
+    
+      one->descend();
+      two->descend();
+      three->descend();
+      four->descend();
+      
+      // We do not need to re-aggregate the lines into our parent member, as the
+      // lines vector only stores pointers to lines, the contents of which are updated.
+      // Since the number of lines in the program does not change, having all of the
+      // line pointers in one place is sufficient to ensure correctness.
   }
   
-  return totalLineLineCollisions;
+  //return totalLineLineCollisions;
 }
 
 int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
