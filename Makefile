@@ -36,7 +36,7 @@ CC      := g++
 CILK    := icc
 # icc does not support newest gcc compiled  tr1 tuples
 #http://code.google.com/p/googletest/issues/detail?id=100
-CFLAGS  := -Wall -g -I/usr/X11R6/include/ -I/afs/csail.mit.edu/proj/courses/6.172/cilkutil/include -DGTEST_HAS_TR1_TUPLE=0 -std=c++0x
+CFLAGS  := -Wall -g -I/usr/X11R6/include/ -I/afs/csail.mit.edu/proj/courses/6.172/cilkutil/include -DGTEST_HAS_TR1_TUPLE=0
 LDFLAGS := -lXext -lX11 -lm 
 ARFLAGS := r
 
