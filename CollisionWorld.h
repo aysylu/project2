@@ -6,6 +6,7 @@ using namespace std;
 
 #include "Line.h"
 #include "IntersectionDetection.h"
+#include "Quadtree.h"
 #include <cilk/reducer_list.h>
 class CollisionWorld
 {
@@ -26,8 +27,13 @@ protected:
    // Record the total number of line line intersection
    unsigned int numLineLineCollisions;
 
+
 public:
    CollisionWorld();
+   
+   // Record the total number of line line intersections
+   // found by the quadtree implementation
+   unsigned int quadtree_lineLineCollisions;
 
    // Return the total number of lines in the box
    unsigned int getNumOfLines();

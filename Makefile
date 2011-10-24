@@ -18,7 +18,8 @@ HDRS = \
        IntersectionDetection.h \
        Line.h \
        LineDemo.h \
-       Vec.h
+       Vec.h \
+       Quadtree.h
 SRCS = $(HDRS:.h=.cpp)
 
 # Files used when building for profiling.
