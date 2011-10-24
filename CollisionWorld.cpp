@@ -7,7 +7,6 @@
 #include <math.h>
 #include <assert.h>
 #include <stdio.h>
-
 #include "CollisionWorld.h"
 #include "IntersectionDetection.h"
 #include "Line.h"
@@ -17,6 +16,7 @@ CollisionWorld::CollisionWorld()
 {
    numLineWallCollisions = 0;
    numLineLineCollisions = 0;
+   quadtree_lineLineCollisions = 0;
    timeStep = 0.5;
 }
 
@@ -24,11 +24,19 @@ CollisionWorld::CollisionWorld()
 // Update the lines.
 void CollisionWorld::updateLines()
 {
-   detectIntersection();
+   int linesLength = lines.size();
+
+   Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
+   
+   int quadtreeCollisions = qtree->descend(lines);
+   quadtree_lineLineCollisions += quadtreeCollisions;
+   delete(qtree);
+
+   assert(linesLength == lines.size());
+//   detectIntersection();
    updatePosition();
    lineWallCollision();
 }
-
 
 // Test all line-line pairs to see if they will intersect before the next time
 // step.
@@ -196,6 +204,9 @@ Line *CollisionWorld::getLine(unsigned int index)
 // Delete all lines in the box
 void CollisionWorld::deleteLines()
 {
+   for (vector<Line*>::iterator it = lines.begin(); it < lines.end(); it++) {
+     delete *it;
+   }
    lines.clear();
 }
 

@@ -68,6 +68,7 @@ LineDemo::LineDemo()
 
 LineDemo::~LineDemo()
 {
+   this->deleteLines();
    delete collisionWorld;
 }
 
@@ -101,3 +102,9 @@ unsigned int LineDemo::getNumLineLineCollisions()
 {
    return collisionWorld->getNumLineLineCollisions();
 }
+
+unsigned int LineDemo::getQuadtreeLineLineCollisions()
+{
+  return collisionWorld->quadtree_lineLineCollisions;
+}
+
