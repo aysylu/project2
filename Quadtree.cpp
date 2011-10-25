@@ -355,12 +355,3 @@ Quadtree::~Quadtree() {
 int Quadtree::getNumLineLineCollisions(){
   return numLineLineCollisions.get_value();
 }
-
-void Quadtree::resetNumLineLineCollisions(){
-  // Hackish - cilk::reducer_opadd<int> doesn't provide us with a way to set
-  // the variable to 0, so we do it this way...
-  int collisionValue = numLineLineCollisions.get_value();
-  if(collisionValue){
-    numLineLineCollisions += -collisionValue;
-  }
-}

@@ -37,12 +37,7 @@ class Quadtree{
   
  public:
   Quadtree(double, double, double, double);
-<<<<<<< Updated upstream:Quadtree.h
-=======
-
->>>>>>> Stashed changes:Quadtree.h
   int getNumLineLineCollisions();
-  void resetNumLineLineCollisions();
   void descend();
   vector<Line *> lines;
   ~Quadtree();
