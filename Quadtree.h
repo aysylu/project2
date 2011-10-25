@@ -23,6 +23,8 @@ struct IntersectionInfo {
   }
 };
 
+static cilk::reducer_opadd<int> numLineLineCollisions;
+
 class Quadtree{
   double start_width;
   double end_width;
@@ -31,8 +33,6 @@ class Quadtree{
   double end_height;
 
   double timeStep;
-
-
 
   unsigned int maxDepth;
   unsigned int currentDepth;
@@ -45,10 +45,13 @@ class Quadtree{
  public:
   Quadtree(double, double, double, double);
   /* int descend(); */
+  int getNumLineLineCollisions();
+  void resetNumLineLineCollisions();
   void descend();
   vector<Line *> lines;
   ~Quadtree();
-  static cilk::reducer_opadd<int> numLineLineCollisions;
+
+
   
  private:
   Quadtree * one;
@@ -78,6 +81,7 @@ class Quadtree{
                     vector<Line*> *,vector<Line*> *, vector<Line*> *);
   int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
   void collisionSolver(Line *, Line *, IntersectionType);
+  
 };
 
 #endif /* QUADTREE_H*/

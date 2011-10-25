@@ -174,7 +174,7 @@ void Quadtree::descend(){
       currentDepth >= maxDepth) {
        totalLineLineCollisions = detectLineLineCollisions(&lines);
        
-       this->numLineLineCollisions += totalLineLineCollisions;
+       numLineLineCollisions += totalLineLineCollisions;
        
        list<IntersectionInfo> intersectList = intersectedPairs->get_value();
        for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
@@ -194,7 +194,7 @@ void Quadtree::descend(){
       totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
                                   &one->lines, &two->lines, &three->lines, &four->lines);
       
-      this->numLineLineCollisions += totalLineLineCollisions;
+      numLineLineCollisions += totalLineLineCollisions;
       
        list<IntersectionInfo> intersectList = intersectedPairs->get_value();
        // Once we find the collisions, we update the velocities of the lines to solve the
@@ -205,23 +205,18 @@ void Quadtree::descend(){
        }
     }
     // Recurse into the children, detecting collisions among their lines.
-      // totalLineLineCollisions += one->descend();
-      // totalLineLineCollisions += two->descend();
-      // totalLineLineCollisions += three->descend();
-      // totalLineLineCollisions += four->descend();
     
-      one->descend();
-      two->descend();
-      three->descend();
+      cilk_spawn one->descend();
+      cilk_spawn two->descend();
+      cilk_spawn three->descend();
       four->descend();
+      cilk_sync;
       
       // We do not need to re-aggregate the lines into our parent member, as the
       // lines vector only stores pointers to lines, the contents of which are updated.
       // Since the number of lines in the program does not change, having all of the
       // line pointers in one place is sufficient to ensure correctness.
   }
-  
-  //return totalLineLineCollisions;
 }
 
 int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
@@ -362,4 +357,17 @@ Quadtree::~Quadtree() {
   }
 
   delete intersectedPairs;
+}
+
+int Quadtree::getNumLineLineCollisions(){
+  return numLineLineCollisions.get_value();
+}
+
+void Quadtree::resetNumLineLineCollisions(){
+  // Hackish - cilk::reducer_opadd<int> doesn't provide us with a way to set
+  // the variable to 0, so we do it this way...
+  int collisionValue = numLineLineCollisions.get_value();
+  if(collisionValue){
+    numLineLineCollisions += -collisionValue;
+  }
 }

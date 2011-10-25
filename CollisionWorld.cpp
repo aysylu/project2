@@ -29,18 +29,13 @@ void CollisionWorld::updateLines()
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
    qtree->lines = lines;
    
-   // int quadtreeCollisions = qtree->(lines);
-   // int quadtreeCollisions = qtree->descend();
-   // quadtree_lineLineCollisions += quadtreeCollisions;
    qtree->descend();
-   quadtree_lineLineCollisions = qtree->numLineLineCollisions.get_value();
-   qtree->numLineLineCollisions -= qtree->numLineLineCollisions.get_value();
+   quadtree_lineLineCollisions = qtree->getNumLineLineCollisions();
    
    lines = qtree->lines;
    delete(qtree);
 
 //   assert(linesLength == lines.size());
-//   detectIntersection();
    updatePosition();
    lineWallCollision();
 }
