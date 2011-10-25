@@ -26,44 +26,36 @@ struct IntersectionInfo {
 static cilk::reducer_opadd<int> numLineLineCollisions;
 
 class Quadtree{
+
+  double timeStep;
+
+ protected:
+  unsigned int currentDepth;
+  int divisionThresh;
+  Quadtree * parent;
+  vector<Line *> spanningLines;
+  
+ public:
+  Quadtree(double, double, double, double);
+  int getNumLineLineCollisions();
+  void descend();
+  vector<Line *> lines;
+  ~Quadtree();
+
+ private:
   double start_width;
   double end_width;
 
   double start_height;
   double end_height;
 
-  double timeStep;
-
-  unsigned int maxDepth;
-  unsigned int currentDepth;
-
-  int divisionThresh;
- protected:
-  Quadtree * parent;
-  vector<Line *> spanningLines;
-  
- public:
-  Quadtree(double, double, double, double);
-  /* int descend(); */
-  int getNumLineLineCollisions();
-  void resetNumLineLineCollisions();
-  void descend();
-  vector<Line *> lines;
-  ~Quadtree();
-
-
-  
- private:
   Quadtree * one;
   Quadtree * two;
   Quadtree * three;
   Quadtree * four;
 
-  double qtree_sw;
-  double qtree_ew;
-  double qtree_sh;
-  double qtree_eh;
-
+  unsigned int maxDepth;
+  
   cilk::reducer_list_append<IntersectionInfo> * intersectedPairs;
   
   void divideSelf();

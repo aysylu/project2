@@ -16,19 +16,12 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   four = NULL;
   parent = NULL;
   
-  qtree_sw = 0;
-  qtree_ew = 0;
-  
-  qtree_sh = 0;
-  qtree_eh = 0;
-
   // If we don't want a maximum depth, simply set maxDepth = (unsigned int)-1
   maxDepth = 3;
   // The depth/level of the quadtree in the recurrence
   currentDepth = 0;
 
   timeStep = 0.5;
-  //numLineLineCollisions = 0;
 }
 
 void Quadtree::divideSelf() {
@@ -209,7 +202,7 @@ void Quadtree::descend(){
       cilk_spawn one->descend();
       cilk_spawn two->descend();
       cilk_spawn three->descend();
-      four->descend();
+                 four->descend();
       cilk_sync;
       
       // We do not need to re-aggregate the lines into our parent member, as the
@@ -361,13 +354,4 @@ Quadtree::~Quadtree() {
 
 int Quadtree::getNumLineLineCollisions(){
   return numLineLineCollisions.get_value();
-}
-
-void Quadtree::resetNumLineLineCollisions(){
-  // Hackish - cilk::reducer_opadd<int> doesn't provide us with a way to set
-  // the variable to 0, so we do it this way...
-  int collisionValue = numLineLineCollisions.get_value();
-  if(collisionValue){
-    numLineLineCollisions += -collisionValue;
-  }
 }

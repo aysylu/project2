@@ -99,8 +99,8 @@ int main(int argc, char** argv)
    // output results
    cout << lineDemo->getNumLineWallCollisions()
         << " Line-Wall Collisions" << endl;
-   cout << lineDemo->getNumLineLineCollisions()
-        << " Line-Line Collisions" << endl;
+//   cout << lineDemo->getNumLineLineCollisions()
+//        << " Line-Line Collisions" << endl;
    cout << lineDemo->getQuadtreeLineLineCollisions()
         << " Quadtree Line-Line Collisions" << endl;
 
