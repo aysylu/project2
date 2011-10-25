@@ -16,12 +16,6 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   four = NULL;
   parent = NULL;
   
-  qtree_sw = 0;
-  qtree_ew = 0;
-  
-  qtree_sh = 0;
-  qtree_eh = 0;
-
   // If we don't want a maximum depth, simply set maxDepth = (unsigned int)-1
   maxDepth = 3;
   // The depth/level of the quadtree in the recurrence
