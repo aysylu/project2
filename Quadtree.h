@@ -40,7 +40,7 @@ class Quadtree{
   int divisionThresh;
  protected:
   Quadtree * parent;
-  vector<Line *> spanningLines;
+  cilk::reducer_list_append<Line *> spanningLines;
   
  public:
   Quadtree(double, double, double, double);
@@ -48,7 +48,7 @@ class Quadtree{
   int getNumLineLineCollisions();
   void resetNumLineLineCollisions();
   void descend();
-  vector<Line *> lines;
+  cilk::reducer_list_append<Line *>  lines;
   ~Quadtree();
 
 
@@ -69,17 +69,17 @@ class Quadtree{
   void divideSelf();
 
   void distributeLines(Quadtree *, Quadtree *, Quadtree *, Quadtree *,
-		       vector<Line*>);
+		       list<Line*>);
 
   vector<Line*>* distributeLinesOne(Quadtree *);
   vector<Line*>* distributeLinesTwo(Quadtree *);
   vector<Line*>* distributeLinesThree(Quadtree *);
   vector<Line*>* distributeLinesFour(Quadtree *);
 
-  int detectLineLineCollisions(vector<Line*> *);
-  int detectSpanningLineLineCollisions(vector<Line*> *, vector<Line*> *,
-                    vector<Line*> *,vector<Line*> *, vector<Line*> *);
-  int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
+  int detectLineLineCollisions(list<Line*> *);
+  int detectSpanningLineLineCollisions(list<Line*> *, list<Line*> *,
+                    list<Line*> *, list<Line*> *, list<Line*> *);
+  int detectLineLineCollisionsTwoLines(list<Line*> *, list<Line*> *);
   void collisionSolver(Line *, Line *, IntersectionType);
   
 };

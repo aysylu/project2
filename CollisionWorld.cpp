@@ -27,12 +27,17 @@ void CollisionWorld::updateLines()
    int linesLength = lines.size();
 
    Quadtree * qtree = new Quadtree(BOX_XMIN, BOX_XMAX, BOX_YMIN, BOX_YMAX);
-   qtree->lines = lines;
+
+   cilk_for(int i=0; i < lines.size(); ++i) {
+     Line * line = lines[i];
+     qtree->lines.push_back(line);
+   }
+   //qtree->lines = lines;
    
    qtree->descend();
    quadtree_lineLineCollisions = qtree->getNumLineLineCollisions();
    
-   lines = qtree->lines;
+   //lines = qtree->lines;
    delete(qtree);
 
 //   assert(linesLength == lines.size());

@@ -89,7 +89,7 @@ void Quadtree::divideSelf() {
 }
 
 void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtree * qtreeThree, Quadtree * qtreeFour,
-			       vector<Line*> divideLines){
+			       list<Line*> divideLines){
   vector<Line*>::iterator it;
   
   double qtreeOne_sw = qtreeOne->start_width;
@@ -118,8 +118,9 @@ void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtre
 
   // Divide the lines into one of four quadtrees - else, consider the
   // line a spanning line. A spanning line spans multiple quadtrees.
-  for(it=divideLines.begin(); it < divideLines.end(); it++){
-    Line * line = *it;
+  vector<Line *> _divideLines(divideLines.begin(), divideLines.end());
+  cilk_for(int i = 0; i < _divideLines.size(); ++i){
+    Line * line = _divideLines[i];
     bool assignedQuadtree = false;
 
     // Is line in qtreeOne?
@@ -170,9 +171,9 @@ void Quadtree::descend(){
   // If we have at least divisionThresh lines in our Quadtree, do not descend any further.
   // Also, if we've descended to a level that's greater than or equal to the current depth,
   // stop descending.
-  if (lines.size() < divisionThresh ||
+  if (lines.get_value().size() < divisionThresh ||
       currentDepth >= maxDepth) {
-       totalLineLineCollisions = detectLineLineCollisions(&lines);
+       totalLineLineCollisions = detectLineLineCollisions((list<Line *> *)&lines.get_value());
        
        numLineLineCollisions += totalLineLineCollisions;
        
@@ -186,13 +187,13 @@ void Quadtree::descend(){
     divideSelf();
 
     // Distribute the lines in the parent Quadtree among the four child Quadtrees
-    distributeLines(one, two, three, four, lines);
+    distributeLines(one, two, three, four, (list<Line *>) lines.get_value());
 
     // Since we don't propagate spanning lines into the child Quadtrees, we want to detect
     // collisions between the spanning lines and the childrens' lines now.
-    if (spanningLines.size() > 0) {
-      totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
-                                  &one->lines, &two->lines, &three->lines, &four->lines);
+    if ((list<Line *> *) spanningLines.get_value().size() > 0) {
+      totalLineLineCollisions += detectSpanningLineLineCollisions((list<Line *> *) &spanningLines,
+                                 (list<Line *> *) &one->lines, (list<Line *> *)&two->lines,(list<Line *> *) &three->lines, (list<Line *> *)&four->lines);
       
       numLineLineCollisions += totalLineLineCollisions;
       
@@ -219,16 +220,19 @@ void Quadtree::descend(){
   }
 }
 
-int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
-                                               vector<Line *> * otherLines) {
+int Quadtree::detectLineLineCollisionsTwoLines(list<Line *> * _lines,
+                                               list<Line *> * otherLines) {
    vector<Line*>::iterator _it1, _it2;
    int numCollisions = 0;
 
+   vector<Line*> __lines(_lines->begin(), _lines->end());
+   vector<Line*> __otherLines(otherLines->begin(), otherLines->end());
+
    // Pairwise collision detection between members of _lines and members of otherLines
-   cilk_for (int i = 0; i < _lines->size(); ++i) {
-      Line *l1 = _lines->at(i);
-      for (int j = 0; j < otherLines->size(); ++j) {
-         Line *l2 = otherLines->at(j);
+   cilk_for (int i = 0; i < __lines.size(); ++i) {
+      Line *l1 = __lines[i];
+      for (int j = 0; j < __otherLines.size(); ++j) {
+         Line *l2 = __otherLines[j];
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
 	   // If the lines are intersecting, add them to the intersectedPairs list for
@@ -242,31 +246,33 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
   
 }
 
-int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _spanningLines,
-                              vector<Line *> * _linesOne, vector<Line *> * _linesTwo,
-                            vector<Line *> * _linesThree, vector<Line *> * _linesFour)
+int Quadtree::detectSpanningLineLineCollisions(list<Line *> * _spanningLines,
+                            list<Line *> * _linesOne, list<Line *> * _linesTwo,
+                            list<Line *> * _linesThree, list<Line *> * _linesFour)
 {
    int totalLineLineCollisions = 0;
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesOne);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesTwo);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesThree);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesFour);
-   totalLineLineCollisions += detectLineLineCollisions(_spanningLines);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesOne);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesTwo);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesThree);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines,(list<Line *> *) _linesFour);
+   totalLineLineCollisions += detectLineLineCollisions((list<Line *> *)_spanningLines);
    return totalLineLineCollisions;
 }
 
-int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
+int Quadtree::detectLineLineCollisions(list<Line *> * _lines) {
    vector<Line*>::iterator it1, it2;
    int totalLineLineCollisions = 0;
 
+   vector<Line *> ourLines(_lines->begin(), _lines->end());
+
    // Checks if any pair of lines in _lines has a collision. This is O(n^2).
-   cilk_for (int i = 0; i < _lines->size(); ++i) {
-      Line *l1 = _lines->at(i);
-      for (int j = i + 1; j < _lines->size(); ++j) {
-         Line *l2 = _lines->at(j);
+   cilk_for (int i = 0; i < ourLines.size(); ++i) {
+      Line *l1 = ourLines[i];
+      for (int j = i + 1; j < ourLines.size(); ++j) {
+         Line *l2 = ourLines[j];
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
          if (intersectionType != NO_INTERSECTION) {
   	    // If the lines are intersecting, add them to the intersectedPairs list for
