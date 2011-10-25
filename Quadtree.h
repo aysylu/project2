@@ -76,10 +76,10 @@ class Quadtree{
   vector<Line*>* distributeLinesThree(Quadtree *);
   vector<Line*>* distributeLinesFour(Quadtree *);
 
-  int detectLineLineCollisions(list<Line*> *);
-  int detectSpanningLineLineCollisions(list<Line*> *, list<Line*> *,
-                    list<Line*> *, list<Line*> *, list<Line*> *);
-  int detectLineLineCollisionsTwoLines(list<Line*> *, list<Line*> *);
+  int detectLineLineCollisions(const list<Line*> *);
+  int detectSpanningLineLineCollisions(const list<Line*> *, const list<Line*> *,
+                    const list<Line*> *, const list<Line*> *, const list<Line*> *);
+  int detectLineLineCollisionsTwoLines(const list<Line*> *, const list<Line*> *);
   void collisionSolver(Line *, Line *, IntersectionType);
   
 };

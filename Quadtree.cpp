@@ -89,7 +89,7 @@ void Quadtree::divideSelf() {
 }
 
 void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtree * qtreeThree, Quadtree * qtreeFour,
-			       list<Line*> divideLines){
+			       const list<Line*> divideLines){
   vector<Line*>::iterator it;
   
   double qtreeOne_sw = qtreeOne->start_width;
@@ -173,7 +173,7 @@ void Quadtree::descend(){
   // stop descending.
   if (lines.get_value().size() < divisionThresh ||
       currentDepth >= maxDepth) {
-       totalLineLineCollisions = detectLineLineCollisions((list<Line *> *)&lines.get_value());
+       totalLineLineCollisions = detectLineLineCollisions(&lines.get_value());
        
        numLineLineCollisions += totalLineLineCollisions;
        
@@ -187,13 +187,13 @@ void Quadtree::descend(){
     divideSelf();
 
     // Distribute the lines in the parent Quadtree among the four child Quadtrees
-    distributeLines(one, two, three, four, (list<Line *>) lines.get_value());
+    distributeLines(one, two, three, four, lines.get_value());
 
     // Since we don't propagate spanning lines into the child Quadtrees, we want to detect
     // collisions between the spanning lines and the childrens' lines now.
-    if ((list<Line *> *) spanningLines.get_value().size() > 0) {
-      totalLineLineCollisions += detectSpanningLineLineCollisions((list<Line *> *) &spanningLines,
-                                 (list<Line *> *) &one->lines, (list<Line *> *)&two->lines,(list<Line *> *) &three->lines, (list<Line *> *)&four->lines);
+    if (spanningLines.get_value().size() > 0) {
+      totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines.get_value(),
+								  &one->lines.get_value(), &two->lines.get_value(), &three->lines.get_value(), &four->lines.get_value());
       
       numLineLineCollisions += totalLineLineCollisions;
       
@@ -220,8 +220,8 @@ void Quadtree::descend(){
   }
 }
 
-int Quadtree::detectLineLineCollisionsTwoLines(list<Line *> * _lines,
-                                               list<Line *> * otherLines) {
+int Quadtree::detectLineLineCollisionsTwoLines(const list<Line *> * _lines,
+                                               const list<Line *> * otherLines) {
    vector<Line*>::iterator _it1, _it2;
    int numCollisions = 0;
 
@@ -246,23 +246,23 @@ int Quadtree::detectLineLineCollisionsTwoLines(list<Line *> * _lines,
   
 }
 
-int Quadtree::detectSpanningLineLineCollisions(list<Line *> * _spanningLines,
-                            list<Line *> * _linesOne, list<Line *> * _linesTwo,
-                            list<Line *> * _linesThree, list<Line *> * _linesFour)
+int Quadtree::detectSpanningLineLineCollisions(const list<Line *> * _spanningLines,
+                            const list<Line *> * _linesOne, const list<Line *> * _linesTwo,
+                            const list<Line *> * _linesThree, const list<Line *> * _linesFour)
 {
    int totalLineLineCollisions = 0;
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesOne);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesTwo);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines, (list<Line *> *)_linesThree);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines((list<Line *> *)_spanningLines,(list<Line *> *) _linesFour);
-   totalLineLineCollisions += detectLineLineCollisions((list<Line *> *)_spanningLines);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesOne);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesTwo);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesThree);
+   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesFour);
+   totalLineLineCollisions += detectLineLineCollisions(_spanningLines);
    return totalLineLineCollisions;
 }
 
-int Quadtree::detectLineLineCollisions(list<Line *> * _lines) {
+int Quadtree::detectLineLineCollisions(const list<Line *> * _lines) {
    vector<Line*>::iterator it1, it2;
    int totalLineLineCollisions = 0;
 
