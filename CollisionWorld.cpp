@@ -35,7 +35,6 @@ void CollisionWorld::updateLines()
    lines = qtree->lines;
    delete(qtree);
 
-//   assert(linesLength == lines.size());
    updatePosition();
    lineWallCollision();
 }

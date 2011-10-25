@@ -28,7 +28,6 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   currentDepth = 0;
 
   timeStep = 0.5;
-  //numLineLineCollisions = 0;
 }
 
 void Quadtree::divideSelf() {
@@ -209,7 +208,7 @@ void Quadtree::descend(){
       cilk_spawn one->descend();
       cilk_spawn two->descend();
       cilk_spawn three->descend();
-      four->descend();
+                 four->descend();
       cilk_sync;
       
       // We do not need to re-aggregate the lines into our parent member, as the

@@ -44,7 +44,6 @@ class Quadtree{
   
  public:
   Quadtree(double, double, double, double);
-  /* int descend(); */
   int getNumLineLineCollisions();
   void resetNumLineLineCollisions();
   void descend();
