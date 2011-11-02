@@ -1,0 +1,9 @@
+== Line beta grades ==
+
+Group: aysylu-nathan_
+Correctness (out of 15): 10
+Performance (out of 15): 8.267690658
+Total (out of 30): 18.26769066
+
+Comments: Comments:
+Inconsistent Collision Count
