@@ -47,7 +47,7 @@ ifeq ($(DEBUG),1)
     $(shell echo debug > .buildmode)
   endif
 else
-  CFLAGS := -O3 $(CFLAGS)
+  CFLAGS := -DNDEBUG -O3 $(CFLAGS)
   ifneq ($(OLDMODE),nodebug)
     $(shell echo nodebug > .buildmode)
   endif
