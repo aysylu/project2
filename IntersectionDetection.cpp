@@ -13,6 +13,11 @@ IntersectionType intersect(Line *l1, Line *l2, double time)
   }
   else if((l1->type == HORIZONTAL) && (l2->type == HORIZONTAL)){
     return cheapIntersectionHorizontal(l1,l2);
+  } else if ((l1->type == VERTICAL) && (l2->type == HORIZONTAL)) {
+    return cheapIntersectionHV(l1, l2);
+  }
+  else if((l1->type == HORIZONTAL) && (l2->type == VERTICAL)) {
+    return cheapIntersectionHV(l2, l1);
   }
   // Else, run the normal line intersection code
    Vec vel;
@@ -154,6 +159,54 @@ IntersectionType cheapIntersectionHorizontal(Line * l1, Line * l2){
   if(l2->p2.x >= l1->p2.x &&
      l2->p2.x <= l1->p1.x)
     return L1_WITH_L2;
+
+  return NO_INTERSECTION;
+}
+
+IntersectionType cheapIntersectionHV(Line * l1, Line * l2){
+  // We require that l1 is vertical
+  // and l2 is horizontal
+
+  // Can only intersect if l1 is within x range of l2
+  //   and l2 and within y range of l1
+
+  if (l1->p1.x >= l2->p1.x &&
+      l1->p1.x <= l2->p2.x) {
+    // the vertical line is within x range of the horizontal
+    if (l2->p1.y >= l1->p1.y &&
+        l2->p1.y >= l2->p2.y) {
+    // the horizontal line is within y range of the vertical
+        return L1_WITH_L2;
+    }
+  }
+  if (l1->p1.x >= l2->p2.x &&
+      l1->p1.x <= l2->p1.x) {
+    // the vertical line is within x range of the horizontal
+    if (l2->p1.y >= l1->p1.y &&
+        l2->p1.y >= l2->p2.y) {
+    // the horizontal line is within y range of the vertical
+        return L1_WITH_L2;
+    }
+  }
+
+  if (l1->p1.x >= l2->p1.x &&
+      l1->p1.x <= l2->p2.x) {
+    // the vertical line is within x range of the horizontal
+    if (l2->p1.y >= l1->p2.y &&
+        l2->p1.y >= l2->p1.y) {
+    // the horizontal line is within y range of the vertical
+        return L1_WITH_L2;
+    }
+  }
+  if (l1->p1.x >= l2->p2.x &&
+      l1->p1.x <= l2->p1.x) {
+    // the vertical line is within x range of the horizontal
+    if (l2->p1.y >= l1->p2.y &&
+        l2->p1.y >= l2->p1.y) {
+    // the horizontal line is within y range of the vertical
+        return L1_WITH_L2;
+    }
+  }
 
   return NO_INTERSECTION;
 }

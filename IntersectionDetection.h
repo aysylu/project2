@@ -10,6 +10,7 @@ typedef enum {NO_INTERSECTION, L1_WITH_L2, L2_WITH_L1,
 
 IntersectionType cheapIntersectionHorizontal(Line * l1, Line * l2);
 IntersectionType cheapIntersectionVertical(Line * l1, Line * l2);
+IntersectionType cheapIntersectionHV(Line * l1, Line * l2);
 
 // Detect if line l1 and l2 will be intersected in the next time step.
 IntersectionType intersect(Line *l1, Line *l2, double time);
