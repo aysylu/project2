@@ -110,7 +110,7 @@ IntersectionType cheapIntersectionVertical(Line * l1, Line * l2){
   assert(l2->p1.x == l2->p2.x);
 
   double difference = our_abs(l1->p1.x - l2->p1.x);
-  if(difference < 0.00001)
+  if(difference > 0.0000001)
     return NO_INTERSECTION;
     
   if(l2->p1.y >= l1->p1.y &&
@@ -136,7 +136,7 @@ IntersectionType cheapIntersectionHorizontal(Line * l1, Line * l2){
   // Can only intersect if points of both lines have the same
   // y coordinates
   double difference = our_abs(l1->p1.y - l2->p1.y);
-  if(difference < 0.00001)
+  if(difference > 0.0000001)
     return NO_INTERSECTION;
 
   if(l2->p1.x >= l1->p1.x &&
