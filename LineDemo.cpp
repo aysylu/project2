@@ -48,9 +48,6 @@ void LineDemo::createLines()
       line->isGray = isGray;
 
       collisionWorld->addLine(line);
-
-      // Add the line's length to the cache of line lengths.
-      line->mass = (line->p1 - line->p2).length();
    }
    fclose(fin);
 }

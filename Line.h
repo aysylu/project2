@@ -22,7 +22,6 @@ struct Line {
    Vec p1;
    Vec p2;
    Vec vel;
-   double mass;
    bool isGray;
 };
 

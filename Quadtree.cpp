@@ -215,7 +215,8 @@ void Quadtree::descend(){
 int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
                                                vector<Line *> * otherLines) {
    vector<Line*>::iterator _it1, _it2;
-   int numCollisions = 0;
+   // int numCollisions = 0;
+   cilk::reducer_opadd<int> numCollisions;
 
    // Pairwise collision detection between members of _lines and members of otherLines
    cilk_for (int i = 0; i < _lines->size(); ++i) {
@@ -227,11 +228,11 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
 	   // If the lines are intersecting, add them to the intersectedPairs list for
 	   // later resolution.
            intersectedPairs->push_back(IntersectionInfo(l1, l2, intersectionType));
-            numCollisions++;
+           numCollisions++;
          }
       }
    }
-   return numCollisions;
+   return numCollisions.get_value();
   
 }
 
@@ -253,7 +254,7 @@ int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _spanningLines,
 
 int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    vector<Line*>::iterator it1, it2;
-   int totalLineLineCollisions = 0;
+   cilk::reducer_opadd<int> totalLineLineCollisions;
 
    // Checks if any pair of lines in _lines has a collision. This is O(n^2).
    cilk_for (int i = 0; i < _lines->size(); ++i) {
@@ -269,7 +270,7 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
          }
       }
    }
-   return totalLineLineCollisions;
+   return totalLineLineCollisions.get_value();
 }
 
 void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
@@ -318,8 +319,8 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
    // Compute the mass of each line (we simply use its length).
    // Retrieve the length of the line from the cache of line lengths computed
    // in createLines() in LineDemo.cpp
-   double m1 = l1->mass;
-   double m2 = l2->mass;
+   double m1 = (l1->p1 - l1->p2).length();
+   double m2 = (l2->p1 - l2->p2).length();
 
    // Perform the collision calculation (computes the new velocities along the
    // direction normal to the collision face such that momentum and kinetic
