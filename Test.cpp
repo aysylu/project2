@@ -36,6 +36,25 @@ TEST_F(IntersectionDetectionTest, parallelLinesDontIntersect) {
   EXPECT_FALSE(intersectLines(p1, p2, p3, p4));
 }
 
+TEST_F(IntersectionDetectionTest, verticalParallelLinesDontIntersect) {
+  Vec p1(0.025, 0.025);
+  Vec p2(0.025, 0.05);
+  Vec p3(0.015, 0.025);
+  Vec p4(0.015, 0.05);
+
+  Line l1;
+  l1.p1 = p1;
+  l1.p2 = p2;
+  l1.type = VERTICAL;
+  Line l2;
+  l2.p1 = p3;
+  l2.p2 = p4;
+  l2.type = VERTICAL;
+
+  printf("no_intersection? %d l2_with_l1? %d, l1_with_l2? %d\n", intersect(&l1, &l2, 0.5) == NO_INTERSECTION,  intersect(&l1, &l2, 0.5) == L2_WITH_L1, intersect(&l1, &l2, 0.5) == L1_WITH_L2);
+  EXPECT_TRUE(intersect(&l1, &l2, 0.5) == NO_INTERSECTION);
+}
+
 }  // namespace
 
 int main(int argc, char **argv) {
