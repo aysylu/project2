@@ -21,6 +21,18 @@ bool LineDemo::update()
    return true;
 }
 
+LineType LineDemo::detectLineType(Line * line){
+  // Is line horizontal?
+  if(line->p1.y == line->p2.y){
+    return HORIZONTAL;
+  }
+  // Is the line vertical?
+  else if(line->p1.x == line->p2.x){
+    return VERTICAL;
+  }
+  // TODO: add support for diagonal lines.
+  return NONE;
+}
 
 // Read in lines from line.in and add them into collision world for simulation
 void LineDemo::createLines()
@@ -46,6 +58,8 @@ void LineDemo::createLines()
 
       // store color
       line->isGray = isGray;
+
+      line->type = detectLineType(line);
 
       collisionWorld->addLine(line);
    }

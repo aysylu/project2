@@ -1,11 +1,20 @@
 #include "IntersectionDetection.h"
 #include "Line.h"
 #include "Vec.h"
+#include <assert.h>
 
 // Detect if lines l1 and l2 will be intersected between now and the
 // next time step.
 IntersectionType intersect(Line *l1, Line *l2, double time)
 {
+  // Special cases:
+  if((l1->type == VERTICAL) && (l2->type == VERTICAL)){
+    return cheapIntersectionVertical(l1,l2);
+  }
+  else if((l1->type == HORIZONTAL) && (l2->type == HORIZONTAL)){
+    return cheapIntersectionHorizontal(l1,l2);
+  }
+  // Else, run the normal line intersection code
    Vec vel;
    Vec  p1, p2;
    Vec v1(*l1), v2(*l2);
@@ -88,6 +97,66 @@ bool pointInParallelogram(Vec point,
    return false;
 }
 
+double our_abs(double number){
+  if(number < 0)
+    return -number;
+  return number;
+}
+
+IntersectionType cheapIntersectionVertical(Line * l1, Line * l2){
+  // Can only intersect if points of both lines have the
+  // same x coordinates
+  assert(l1->p1.x == l1->p2.x);
+  assert(l2->p1.x == l2->p2.x);
+
+  double difference = our_abs(l1->p1.x - l2->p1.x);
+  if(difference < 0.00001)
+    return NO_INTERSECTION;
+    
+  if(l2->p1.y >= l1->p1.y &&
+     l2->p1.y <= l1->p2.y)
+    return L1_WITH_L2;
+  
+  if(l2->p2.y >= l1->p1.y &&
+     l2->p2.y <= l1->p2.y)
+    return L1_WITH_L2;
+
+  if(l2->p1.y >= l1->p2.y &&
+     l2->p1.y <= l1->p1.y)
+    return L1_WITH_L2;
+  
+  if(l2->p2.y >= l1->p2.y &&
+     l2->p2.y <= l1->p1.y)
+    return L1_WITH_L2;
+  
+  return NO_INTERSECTION;
+}
+
+IntersectionType cheapIntersectionHorizontal(Line * l1, Line * l2){
+  // Can only intersect if points of both lines have the same
+  // y coordinates
+  double difference = our_abs(l1->p1.y - l2->p1.y);
+  if(difference < 0.00001)
+    return NO_INTERSECTION;
+
+  if(l2->p1.x >= l1->p1.x &&
+     l2->p1.x <= l1->p2.x)
+    return L1_WITH_L2;
+  
+  if(l2->p2.x >= l1->p1.x &&
+     l2->p2.x <= l1->p2.x)
+    return L1_WITH_L2;
+
+  if(l2->p1.x >= l1->p2.x &&
+     l2->p1.x <= l1->p1.x)
+    return L1_WITH_L2;
+  
+  if(l2->p2.x >= l1->p2.x &&
+     l2->p2.x <= l1->p1.x)
+    return L1_WITH_L2;
+
+  return NO_INTERSECTION;
+}
 
 // Check if two lines are intersected
 bool intersectLines(Vec p1, Vec p2, Vec p3, Vec p4)
