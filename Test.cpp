@@ -46,15 +46,80 @@ TEST_F(IntersectionDetectionTest, verticalParallelLinesDontIntersect) {
   l1.p1 = p1;
   l1.p2 = p2;
   l1.type = VERTICAL;
+  
   Line l2;
   l2.p1 = p3;
   l2.p2 = p4;
   l2.type = VERTICAL;
 
-  printf("no_intersection? %d l2_with_l1? %d, l1_with_l2? %d\n", intersect(&l1, &l2, 0.5) == NO_INTERSECTION,  intersect(&l1, &l2, 0.5) == L2_WITH_L1, intersect(&l1, &l2, 0.5) == L1_WITH_L2);
   EXPECT_TRUE(intersect(&l1, &l2, 0.5) == NO_INTERSECTION);
 }
 
+  TEST_F(IntersectionDetectionTest, horizontalParallelLinesDontIntersect){
+    Vec l1_p1(0.01, 0.01);
+    Vec l1_p2(0.01, 0.05);
+
+    Vec l2_p1(0.03, 0.01);
+    Vec l2_p2(0.03, 0.05);
+
+    Line l1;
+    l1.p1 = l1_p1;
+    l1.p2 = l1_p2;
+    l1.type = HORIZONTAL;
+
+    Line l2;
+    l2.p1 = l2_p1;
+    l2.p2 = l2_p2;
+    l2.type = HORIZONTAL;
+
+    EXPECT_TRUE(intersect(&l1, &l2, 0.5) == NO_INTERSECTION);
+  }
+
+  TEST_F(IntersectionDetectionTest, horizontalVerticalLinesIntersect){
+    // Vertical line
+    Vec l1_p1(0.01, 0.01);
+    Vec l1_p2(0.01, 0.05);
+
+    // Horizontal line
+    Vec l2_p1(0.001, 0.01);
+    Vec l2_p2(0.02, 0.01);
+    
+    Line l1;
+    l1.p1 = l1_p1;
+    l1.p2 = l1_p2;
+    l1.vel = Vec(0.5, 0.5);
+    l1.type = VERTICAL;
+
+    Line l2;
+    l2.p1 = l2_p1;
+    l2.p2 = l2_p2;
+    l2.vel = Vec(0.5, 0.5);
+    l2.type = HORIZONTAL;
+
+    EXPECT_FALSE(intersect(&l1, &l2, 0.0001) == NO_INTERSECTION);
+  }
+
+  TEST_F(IntersectionDetectionTest, diagonalParallelLinesDontIntersect){
+    Vec l1_p1(0.01, 0.01);
+    Vec l1_p2(0.02, 0.02);
+
+    Vec l2_p1(0.03, 0.01);
+    Vec l2_p2(0.04, 0.02);
+    
+    Line l1;
+    l1.p1 = l1_p1;
+    l1.p2 = l1_p2;
+    l1.vel = Vec(0.5, 0.5);
+    l1.type = DIAGONAL;
+
+    Line l2;
+    l2.p1 = l2_p1;
+    l2.p2 = l2_p2;
+    l2.vel = Vec(0.5, 0.5);
+    l2.type = DIAGONAL;
+    
+    EXPECT_TRUE(intersect(&l1, &l2, 0.0001) == NO_INTERSECTION);
+  }
 }  // namespace
 
 int main(int argc, char **argv) {
