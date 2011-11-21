@@ -13,7 +13,8 @@ IntersectionType intersect(Line *l1, Line *l2, double time)
   }
   else if((l1->type == HORIZONTAL) && (l2->type == HORIZONTAL)){
     return cheapIntersectionHorizontal(l1,l2);
-  } else if ((l1->type == VERTICAL) && (l2->type == HORIZONTAL)) {
+  }
+  else if ((l1->type == VERTICAL) && (l2->type == HORIZONTAL)) {
     return cheapIntersectionHV(l1, l2);
   }
   else if((l1->type == HORIZONTAL) && (l2->type == VERTICAL)) {
@@ -174,37 +175,9 @@ IntersectionType cheapIntersectionHV(Line * l1, Line * l2){
       l1->p1.x <= l2->p2.x) {
     // the vertical line is within x range of the horizontal
     if (l2->p1.y >= l1->p1.y &&
-        l2->p1.y >= l2->p2.y) {
+        l2->p1.y <= l2->p2.y) {
     // the horizontal line is within y range of the vertical
-        return L1_WITH_L2;
-    }
-  }
-  if (l1->p1.x >= l2->p2.x &&
-      l1->p1.x <= l2->p1.x) {
-    // the vertical line is within x range of the horizontal
-    if (l2->p1.y >= l1->p1.y &&
-        l2->p1.y >= l2->p2.y) {
-    // the horizontal line is within y range of the vertical
-        return L1_WITH_L2;
-    }
-  }
-
-  if (l1->p1.x >= l2->p1.x &&
-      l1->p1.x <= l2->p2.x) {
-    // the vertical line is within x range of the horizontal
-    if (l2->p1.y >= l1->p2.y &&
-        l2->p1.y >= l2->p1.y) {
-    // the horizontal line is within y range of the vertical
-        return L1_WITH_L2;
-    }
-  }
-  if (l1->p1.x >= l2->p2.x &&
-      l1->p1.x <= l2->p1.x) {
-    // the vertical line is within x range of the horizontal
-    if (l2->p1.y >= l1->p2.y &&
-        l2->p1.y >= l2->p1.y) {
-    // the horizontal line is within y range of the vertical
-        return L1_WITH_L2;
+        return ALREADY_INTERSECTED;
     }
   }
 
