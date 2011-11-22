@@ -181,6 +181,9 @@ IntersectionType cheapIntersectionHV(Line * l1, Line * l2){
     }
   }
 
+//  if (intersectLines(l1->p1, l1->p2, l2->p1, l2->p2)) {
+//    return ALREADY_INTERSECTED;
+//  }
   return NO_INTERSECTION;
 }
 
