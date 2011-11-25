@@ -20,6 +20,9 @@ IntersectionType intersect(Line *l1, Line *l2, double time)
   else if((l1->type == HORIZONTAL) && (l2->type == VERTICAL)) {
     return cheapIntersectionHV(l2, l1);
   }
+  else if((l1->type == DIAGONAL) && (l2->type == DIAGONAL)){
+    return cheapIntersectionDD(l1, l2);
+  }
   // Else, run the normal line intersection code
    Vec vel;
    Vec  p1, p2;
@@ -179,6 +182,31 @@ IntersectionType cheapIntersectionHV(Line * l1, Line * l2){
     // the horizontal line is within y range of the vertical
         return ALREADY_INTERSECTED;
     }
+  }
+
+  return NO_INTERSECTION;
+}
+
+IntersectionType cheapIntersectionDD(Line * l1, Line * l2){
+  // We require that both l1 and l2 are diagonal.
+
+  // The function works as follows: we determine the shorter
+  // line and check whether its two points lie inside of the
+  // larger line. If either do, then the lines have collided.
+  Line * longer;
+  Line * shorter;
+
+  if((l1->p1 - l1->p2).length() > (l2->p1 - l2->p2).length()){
+    longer = l1;
+    shorter = l2;
+  } else {
+    longer = l2;
+    shorter = l1;
+  }
+
+  if(onSegment(shorter->p1, longer->p1, longer->p2) ||
+     onSegment(shorter->p2, longer->p1, longer->p2)){
+    return ALREADY_INTERSECTED;
   }
 
   return NO_INTERSECTION;
