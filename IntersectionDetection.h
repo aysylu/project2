@@ -12,6 +12,7 @@ IntersectionType cheapIntersectionHorizontal(Line * l1, Line * l2);
 IntersectionType cheapIntersectionVertical(Line * l1, Line * l2);
 IntersectionType cheapIntersectionHV(Line * l1, Line * l2);
 IntersectionType cheapIntersectionDD(Line * l1, Line * l2);
+IntersectionType cheapIntersectionWithDiagonal(Line *l1, Line * l2);
 
 // Detect if line l1 and l2 will be intersected in the next time step.
 IntersectionType intersect(Line *l1, Line *l2, double time);

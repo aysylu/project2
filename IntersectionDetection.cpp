@@ -23,6 +23,12 @@ IntersectionType intersect(Line *l1, Line *l2, double time)
   else if((l1->type == DIAGONAL) && (l2->type == DIAGONAL)){
     return cheapIntersectionDD(l1, l2);
   }
+  else if (l1->type == DIAGONAL) {
+    return cheapIntersectionWithDiagonal(l1, l2);
+  }
+  else if (l2->type == DIAGONAL) {
+    return cheapIntersectionWithDiagonal(l2, l1);
+  }
   // Else, run the normal line intersection code
    Vec vel;
    Vec  p1, p2;
@@ -216,6 +222,15 @@ IntersectionType cheapIntersectionDD(Line * l1, Line * l2){
     return ALREADY_INTERSECTED;
   }
 
+  return NO_INTERSECTION;
+}
+
+IntersectionType cheapIntersectionWithDiagonal(Line * l1, Line * l2) {
+  // We require that l1 is a diagonal line
+
+  if (onSegment(l2->p1, l1->p1, l1->p2) || onSegment(l2->p2, l1->p1, l1->p2)) {
+    return ALREADY_INTERSECTED;
+  }
   return NO_INTERSECTION;
 }
 
