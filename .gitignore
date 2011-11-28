@@ -1,0 +1,6 @@
+*.stderr
+*.stdout
+*.prof
+*.data
+*.o
+
