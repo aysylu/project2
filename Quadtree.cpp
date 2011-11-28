@@ -184,6 +184,7 @@ int Quadtree::detectSpanningLineLineCollisions(){
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
+   #pragma cilk grainsize=1
    cilk_for(int i = 0; i < NUMBER_CHILD_NODES; i++){
      totalLineLineCollisions += detectCollisionsTwoLineSets(&spanningLines, &child[i]->lines);
    }
