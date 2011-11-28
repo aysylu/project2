@@ -106,13 +106,11 @@ TEST_F(IntersectionDetectionTest, verticalParallelLinesDontIntersect) {
     l1.p1 = l1_p1;
     l1.p2 = l1_p2;
     l1.vel = Vec(0.5, 0.5);
-    l1.type = VERTICAL;
 
     Line l2;
     l2.p1 = l2_p1;
     l2.p2 = l2_p2;
     l2.vel = Vec(0.5, 0.5);
-    l2.type = HORIZONTAL;
 
     EXPECT_FALSE(intersect(&l1, &l2, 0.0001) == NO_INTERSECTION);
   }
