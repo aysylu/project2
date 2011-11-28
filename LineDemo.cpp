@@ -31,7 +31,8 @@ LineType LineDemo::detectLineType(Line * line){
     return VERTICAL;
   }
   // TODO: add support for diagonal lines.
-  return NONE;
+  // return NONE;
+  return DIAGONAL;
 }
 
 // Read in lines from line.in and add them into collision world for simulation

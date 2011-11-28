@@ -9,18 +9,23 @@ IntersectionType intersect(Line *l1, Line *l2, double time)
 {
   // Special cases:
   if((l1->type == VERTICAL) && (l2->type == VERTICAL)){
+    // numCoveredCollisions++;
     return cheapIntersectionVertical(l1,l2);
   }
   else if((l1->type == HORIZONTAL) && (l2->type == HORIZONTAL)){
+    // numCoveredCollisions++;
     return cheapIntersectionHorizontal(l1,l2);
   }
   else if ((l1->type == VERTICAL) && (l2->type == HORIZONTAL)) {
+    // numCoveredCollisions++;
     return cheapIntersectionHV(l1, l2);
   }
   else if((l1->type == HORIZONTAL) && (l2->type == VERTICAL)) {
+    // numCoveredCollisions++;
     return cheapIntersectionHV(l2, l1);
   }
   else if((l1->type == DIAGONAL) && (l2->type == DIAGONAL)){
+    // numCoveredCollisions++;
     return cheapIntersectionDD(l1, l2);
   }
   // Else, run the normal line intersection code
@@ -194,6 +199,18 @@ IntersectionType cheapIntersectionHV(Line * l1, Line * l2){
   return NO_INTERSECTION;
 }
 
+bool pointOnLine(Vec point, Line * line){
+  // Calculate the line's slope
+  double m = (line->p2.y - line->p1.y)/(line->p2.x - line->p1.x);
+  double b = line->p1.y - m * line->p1.x;
+  double found_y = m*point.x + b;
+
+  if(found_y - point.y > 0.00001){
+    return false;
+  }
+  return true;
+}
+
 IntersectionType cheapIntersectionDD(Line * l1, Line * l2){
   // We require that both l1 and l2 are diagonal.
 
@@ -202,18 +219,26 @@ IntersectionType cheapIntersectionDD(Line * l1, Line * l2){
   // larger line. If either do, then the lines have collided.
   Line * longer;
   Line * shorter;
+  bool l2_shorter;
 
   if((l1->p1 - l1->p2).length() > (l2->p1 - l2->p2).length()){
     longer = l1;
     shorter = l2;
+    l2_shorter = true;
   } else {
     longer = l2;
     shorter = l1;
+    l2_shorter = false;
   }
 
-  if(onSegment(shorter->p1, longer->p1, longer->p2) ||
-     onSegment(shorter->p2, longer->p1, longer->p2)){
-    return ALREADY_INTERSECTED;
+  // if(onSegment(shorter->p1, longer->p1, longer->p2) ||
+  //    onSegment(shorter->p2, longer->p1, longer->p2)){
+  if(pointOnLine(shorter->p1, longer) ||
+     pointOnLine(shorter->p2, longer)){
+    // return ALREADY_INTERSECTED;
+    if(l2_shorter)
+      return L2_WITH_L1;
+    return L1_WITH_L2;
   }
 
   return NO_INTERSECTION;
@@ -260,7 +285,6 @@ Vec getIntersectionPoint(Vec p1, Vec p2, Vec p3, Vec p4)
 
    return p1 + (p2 - p1) * u;
 }
-
 
 // Check the direction of two lines (pi, pj) and (pi, pk)
 double direction(Vec pi, Vec pj, Vec pk)
