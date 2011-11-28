@@ -18,14 +18,11 @@
 #define WINDOW_WIDTH 1180
 #define WINDOW_HEIGHT 800
 
-typedef enum { VERTICAL, HORIZONTAL, DIAGONAL, NONE } LineType;
-
 struct Line {
    Vec p1;
    Vec p2;
    Vec vel;
    bool isGray;
-  LineType type;
 };
 
 // convert graphical window coordinates to box coordinates

@@ -7,14 +7,6 @@
 // next time step.
 IntersectionType intersect(Line *l1, Line *l2, double time)
 {
-  // Special cases:
-  if((l1->type == VERTICAL) && (l2->type == VERTICAL)){
-    return cheapIntersectionVertical(l1,l2);
-  }
-  else if((l1->type == HORIZONTAL) && (l2->type == HORIZONTAL)){
-    return cheapIntersectionHorizontal(l1,l2);
-  }
-  // Else, run the normal line intersection code
    Vec vel;
    Vec  p1, p2;
    Vec v1(*l1), v2(*l2);

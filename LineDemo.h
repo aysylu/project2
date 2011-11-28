@@ -44,9 +44,6 @@ public:
    // Get num of lines
    unsigned int getNumOfLines();
 
-   // Get line type
-   LineType detectLineType(Line * line);
-
    // Get number of line-wall collisions
    unsigned int getNumLineWallCollisions();
 
