@@ -24,7 +24,7 @@ struct IntersectionInfo {
 };
 
 #define NUMBER_CHILD_NODES 4
-#define LAST_CHILD_NODE 3
+#define LAST_CHILD_NODE (NUMBER_CHILD_NODES-1)
 
 static cilk::reducer_opadd<int> numLineLineCollisions;
 
@@ -58,7 +58,7 @@ class Quadtree{
   
   cilk::reducer_list_append<IntersectionInfo> * intersectedPairs;
   
-  void divideSelf();
+  void createChildQuadtrees();
 
   void distributeLines();
 
@@ -66,7 +66,7 @@ class Quadtree{
   /* int detectSpanningLineLineCollisions(vector<Line*> *, vector<Line*> *, */
   /*                   vector<Line*> *,vector<Line*> *, vector<Line*> *); */
   int detectSpanningLineLineCollisions();
-  int detectLineLineCollisionsTwoLines(vector<Line*> *, vector<Line*> *);
+  int detectCollisionsTwoLineSets(vector<Line*> *, vector<Line*> *);
   void collisionSolver(Line *, Line *, IntersectionType);
   
 };
