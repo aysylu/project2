@@ -30,8 +30,7 @@ LineType LineDemo::detectLineType(Line * line){
   else if(line->p1.x == line->p2.x){
     return VERTICAL;
   }
-  // TODO: add support for diagonal lines.
-  return NONE;
+  return DIAGONAL;
 }
 
 // Read in lines from line.in and add them into collision world for simulation
