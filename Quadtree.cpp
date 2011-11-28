@@ -156,6 +156,7 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
    cilk::reducer_opadd<int> numCollisions;
 
    // Pairwise collision detection between members of _lines and members of otherLines
+   #pragma cilk grainsize=1
    cilk_for (int i = 0; i < _lines->size(); ++i) {
       Line *l1 = _lines->at(i);
       for (int j = 0; j < otherLines->size(); ++j) {
@@ -191,6 +192,7 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    cilk::reducer_opadd<int> totalLineLineCollisions;
 
    // Checks if any pair of lines in _lines has a collision. This is O(n^2).
+   #pragma cilk grainsize=4
    cilk_for (int i = 0; i < _lines->size(); ++i) {
       Line *l1 = _lines->at(i);
       for (int j = i + 1; j < _lines->size(); ++j) {
