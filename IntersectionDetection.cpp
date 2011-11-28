@@ -119,7 +119,7 @@ IntersectionType cheapIntersectionVertical(Line * l1, Line * l2){
   assert(l2->p1.x == l2->p2.x);
 
   double difference = our_abs(l1->p1.x - l2->p1.x);
-  if(difference > 0.0000001)
+  if(difference > 0.000001)
     return NO_INTERSECTION;
     
   if(l2->p1.y >= l1->p1.y &&
@@ -130,13 +130,17 @@ IntersectionType cheapIntersectionVertical(Line * l1, Line * l2){
      l2->p2.y <= l1->p2.y)
     return L1_WITH_L2;
 
-  if(l2->p1.y >= l1->p2.y &&
-     l2->p1.y <= l1->p1.y)
-    return L1_WITH_L2;
+//  if(l2->p1.y >= l1->p2.y &&
+//     l2->p1.y <= l1->p1.y) {
+//    printf("333333333333333\n");
+//    return L1_WITH_L2;
+//  }
   
-  if(l2->p2.y >= l1->p2.y &&
-     l2->p2.y <= l1->p1.y)
-    return L1_WITH_L2;
+//  if(l2->p2.y >= l1->p2.y &&
+//     l2->p2.y <= l1->p1.y) {
+//    printf("44444444444444444444\n");
+//    return L1_WITH_L2;
+//  }
   
   return NO_INTERSECTION;
 }
