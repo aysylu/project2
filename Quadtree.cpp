@@ -9,11 +9,11 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   divisionThresh = 15;
 
   intersectedPairs = new cilk::reducer_list_append<IntersectionInfo>();
+
+  for(int i = 0; i < NUMBER_CHILD_NODES; i++){
+    child[i] = NULL;
+  }
   
-  one = NULL;
-  two = NULL;
-  three = NULL;
-  four = NULL;
   parent = NULL;
   
   // If we don't want a maximum depth, simply set maxDepth = (unsigned int)-1
@@ -24,133 +24,73 @@ Quadtree::Quadtree(double _start_width, double _end_width, double _start_height,
   timeStep = 0.5;
 }
 
-void Quadtree::divideSelf() {
+void Quadtree::createChildQuadtrees(){
+  double c_start_width[NUMBER_CHILD_NODES];
+  double c_start_height[NUMBER_CHILD_NODES];
+  double c_end_width[NUMBER_CHILD_NODES];
+  double c_end_height[NUMBER_CHILD_NODES];
+  
   // Width of first quadrant
-  double start_width_one = start_width;
-  double end_width_one = start_width + (end_width-start_width)/2;
+  c_start_width[0] = start_width;
+  c_end_width[0] = start_width + (end_width-start_width)/2;
   // Height of first quadrant
-  double start_height_one = start_height;
-  double end_height_one = start_height + (end_height-start_height)/2;
+  c_start_height[0] = start_height;
+  c_end_height[0] = start_height + (end_height-start_height)/2;
 
   // Width of second quadrant
-  double start_width_two = end_width_one;
-  double end_width_two = end_width;
+  c_start_width[1] = c_end_width[0];
+  c_end_width[1] = end_width;
   // Height of second quadrant
-  double start_height_two = start_height;
-  double end_height_two = start_height + (end_height-start_height)/2;
+  c_start_height[1] = start_height;
+  c_end_height[1] = start_height + (end_height-start_height)/2;
 
   // Width of third quadrant
-  double start_width_three = start_width;
-  double end_width_three = start_width + (end_width-start_width)/2;
+  c_start_width[2] = start_width;
+  c_end_width[2] = start_width + (end_width-start_width)/2;
   // Height of third quadrant
-  double start_height_three = end_height_one;
-  double end_height_three = end_height;
+  c_start_height[2] = c_end_height[0];
+  c_end_height[2] = end_height;
 
 
   // Width of fourth quadrant
-  double start_width_four = end_width_one;
-  double end_width_four = end_width;
+  c_start_width[3] = c_end_width[0];
+  c_end_width[3] = end_width;
   // Height of fourth quadrant
-  double start_height_four = end_height_one;
-  double end_height_four = end_height;
+  c_start_height[3] = c_end_height[0];
+  c_end_height[3] = end_height;
 
-  // Allocate the Quadtree structures associated with each of the four
-  // quadrants.
-  Quadtree * _one = new Quadtree(start_width_one, end_width_one,
-				start_height_one, end_height_one);
-  Quadtree * _two = new Quadtree(start_width_two, end_width_two,
-				start_height_two, end_height_two);
-  Quadtree * _three = new Quadtree(start_width_three, end_width_three,
-				start_height_three, end_height_three);
-  Quadtree * _four = new Quadtree(start_width_four, end_width_four,
-				start_height_four, end_height_four);
-  one = _one;
-  two = _two;
-  three = _three;
-  four = _four;
-
-  // Since we're descending down one level, increment the current depth.
-  one->currentDepth = currentDepth + 1;
-  two->currentDepth = currentDepth + 1;
-  three->currentDepth = currentDepth + 1;
-  four->currentDepth = currentDepth + 1;
-  
-  one->parent = this;
-  two->parent = this;
-  three->parent = this;
-  four->parent = this;
+  for(int i = 0; i < NUMBER_CHILD_NODES; i++){
+    // Allocate the Quadtree structure associated with the new quadrant
+    child[i] = new Quadtree(c_start_width[i], c_end_width[i], c_start_height[i], c_end_height[i]);
+    // Since we're descending down one level, increment the current depth.
+    child[i]->currentDepth = currentDepth+1;
+    child[i]->parent = this;
+  }
 }
 
-void Quadtree::distributeLines(Quadtree * qtreeOne, Quadtree * qtreeTwo, Quadtree * qtreeThree, Quadtree * qtreeFour,
-			       vector<Line*> divideLines){
+void Quadtree::distributeLines(){
   vector<Line*>::iterator it;
   
-  double qtreeOne_sw = qtreeOne->start_width;
-  double qtreeOne_ew = qtreeOne->end_width;
-  
-  double qtreeOne_sh = qtreeOne->start_height;
-  double qtreeOne_eh = qtreeOne->end_height;
-
-  double qtreeTwo_sw = qtreeTwo->start_width;
-  double qtreeTwo_ew = qtreeTwo->end_width;
-  
-  double qtreeTwo_sh = qtreeTwo->start_height;
-  double qtreeTwo_eh = qtreeTwo->end_height;
-
-  double qtreeThree_sw = qtreeThree->start_width;
-  double qtreeThree_ew = qtreeThree->end_width;
-  
-  double qtreeThree_sh = qtreeThree->start_height;
-  double qtreeThree_eh = qtreeThree->end_height;
-
-  double qtreeFour_sw = qtreeFour->start_width;
-  double qtreeFour_ew = qtreeFour->end_width;
-  
-  double qtreeFour_sh = qtreeFour->start_height;
-  double qtreeFour_eh = qtreeFour->end_height;
-
-  // Divide the lines into one of four quadtrees - else, consider the
-  // line a spanning line. A spanning line spans multiple quadtrees.
-  for(it=divideLines.begin(); it < divideLines.end(); it++){
-    Line * line = *it;
+  for(it=lines.begin(); it < lines.end(); it++){
+    // Is the line in one of our quadtrees?
     bool assignedQuadtree = false;
+    Line * line = *it;
+    
+    for(int i = 0; (i < NUMBER_CHILD_NODES) && (assignedQuadtree == false); i++){
+      if((line->p1.x >= child[i]->start_width && line->p1.x <= child[i]->end_width) &&
+	 (line->p1.y >= child[i]->start_height && line->p1.y < child[i]->end_height)){
+	
+	if((line->p2.x >= child[i]->start_width && line->p2.x <= child[i]->end_width) &&
+	   (line->p2.y >= child[i]->start_height && line->p2.y < child[i]->end_height)){
+	  
+	  assignedQuadtree = true;
+	  child[i]->lines.push_back(line);
+	  
+	}
+      }
+    }
 
-    // Is line in qtreeOne?
-    if((line->p1.x >= qtreeOne_sw && line->p1.x <= qtreeOne_ew) &&
-       (line->p1.y >= qtreeOne_sh && line->p1.y < qtreeOne_eh)){
-      if((line->p2.x >= qtreeOne_sw && line->p2.x <= qtreeOne_ew) &&
-	 (line->p2.y >= qtreeOne_sh && line->p2.y < qtreeOne_eh)){
-	assignedQuadtree = true;
-	qtreeOne->lines.push_back(line);
-      }
-    }
-    // Is line in qtreeTwoOne?
-    else if((line->p1.x >= qtreeTwo_sw && line->p1.x <= qtreeTwo_ew) &&
-       (line->p1.y >= qtreeTwo_sh && line->p1.y < qtreeTwo_eh)){
-      if((line->p2.x >= qtreeTwo_sw && line->p2.x <= qtreeTwo_ew) &&
-	 (line->p2.y >= qtreeTwo_sh && line->p2.y < qtreeTwo_eh)){
-	assignedQuadtree = true;
-	qtreeTwo->lines.push_back(line);
-      }
-    }
-    // Is line in qtreeThree?
-    else if((line->p1.x >= qtreeThree_sw && line->p1.x <= qtreeThree_ew) &&
-       (line->p1.y >= qtreeThree_sh && line->p1.y < qtreeThree_eh)){
-      if((line->p2.x >= qtreeThree_sw && line->p2.x <= qtreeThree_ew) &&
-	 (line->p2.y >= qtreeThree_sh && line->p2.y < qtreeThree_eh)){
-	assignedQuadtree = true;
-	qtreeThree->lines.push_back(line);
-      }
-    }
-    // Is line in qtreeFour?
-    else if((line->p1.x >= qtreeFour_sw && line->p1.x <= qtreeFour_ew) &&
-       (line->p1.y >= qtreeFour_sh && line->p1.y < qtreeFour_eh)){
-      if((line->p2.x >= qtreeFour_sw && line->p2.x <= qtreeFour_ew) &&
-	 (line->p2.y >= qtreeFour_sh && line->p2.y < qtreeFour_eh)){
-	assignedQuadtree = true;
-	qtreeFour->lines.push_back(line);
-      }
-    }
+    // If not, add it to the spanning lines list
     if(assignedQuadtree == false){
       spanningLines.push_back(line);
     }
@@ -165,65 +105,68 @@ void Quadtree::descend(){
   // stop descending.
   if (lines.size() < divisionThresh ||
       currentDepth >= maxDepth) {
-       totalLineLineCollisions = detectLineLineCollisions(&lines);
+    totalLineLineCollisions = detectLineLineCollisions(&lines);
        
-       numLineLineCollisions += totalLineLineCollisions;
+    numLineLineCollisions += totalLineLineCollisions;
        
-       list<IntersectionInfo> intersectList = intersectedPairs->get_value();
-       for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
-         IntersectionInfo pair = *it;
-         collisionSolver(pair.l1, pair.l2, pair.intersectionType);
-       }
+    list<IntersectionInfo> intersectList = intersectedPairs->get_value();
+    for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
+      IntersectionInfo pair = *it;
+      collisionSolver(pair.l1, pair.l2, pair.intersectionType);
+    }
   } else {
     // Allocate the Quadtree structures for all of the quadrants
-    divideSelf();
+    createChildQuadtrees();
 
     // Distribute the lines in the parent Quadtree among the four child Quadtrees
-    distributeLines(one, two, three, four, lines);
+    distributeLines();
+
+    // Note: Spanning lines are lines that span multiple Quadtrees.
 
     // Since we don't propagate spanning lines into the child Quadtrees, we want to detect
     // collisions between the spanning lines and the childrens' lines now.
     if (spanningLines.size() > 0) {
-      totalLineLineCollisions += detectSpanningLineLineCollisions(&spanningLines,
-                                  &one->lines, &two->lines, &three->lines, &four->lines);
+      totalLineLineCollisions += detectSpanningLineLineCollisions();
       
       numLineLineCollisions += totalLineLineCollisions;
       
-       list<IntersectionInfo> intersectList = intersectedPairs->get_value();
-       // Once we find the collisions, we update the velocities of the lines to solve the
-       // collisions.
-       for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
-         IntersectionInfo pair = *it;
-         collisionSolver(pair.l1, pair.l2, pair.intersectionType);
-       }
+      list<IntersectionInfo> intersectList = intersectedPairs->get_value();
+      // Once we find the collisions, we update the velocities of the lines to solve the
+      // collisions.
+      for (list<IntersectionInfo>::iterator it = intersectList.begin(); it != intersectList.end(); ++it) {
+	IntersectionInfo pair = *it;
+	collisionSolver(pair.l1, pair.l2, pair.intersectionType);
+      }
     }
-    // Recurse into the children, detecting collisions among their lines.
     
-      cilk_spawn one->descend();
-      cilk_spawn two->descend();
-      cilk_spawn three->descend();
-                 four->descend();
-      cilk_sync;
+    // Recurse into the children, detecting collisions among their lines.
+    for(int i = 0; i < NUMBER_CHILD_NODES-1; i++){
+      cilk_spawn child[i]->descend();
+    }
+    child[LAST_CHILD_NODE]->descend();
+    cilk_sync;
       
-      // We do not need to re-aggregate the lines into our parent member, as the
-      // lines vector only stores pointers to lines, the contents of which are updated.
-      // Since the number of lines in the program does not change, having all of the
-      // line pointers in one place is sufficient to ensure correctness.
+    // We do not need to re-aggregate the lines into our parent member, as the
+    // lines vector only stores pointers to lines, the contents of which are updated.
+    // Since the number of lines in the program does not change, having all of the
+    // line pointers in one place is sufficient to ensure correctness.
   }
 }
 
-int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
-                                               vector<Line *> * otherLines) {
+int Quadtree::detectCollisionsTwoLineSets(vector<Line *> * _lines,
+                                          vector<Line *> * otherLines) {
    vector<Line*>::iterator _it1, _it2;
-   // int numCollisions = 0;
    cilk::reducer_opadd<int> numCollisions;
 
    // Pairwise collision detection between members of _lines and members of otherLines
+   #pragma cilk grainsize=1
    cilk_for (int i = 0; i < _lines->size(); ++i) {
       Line *l1 = _lines->at(i);
+      
       for (int j = 0; j < otherLines->size(); ++j) {
          Line *l2 = otherLines->at(j);
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
+	 
          if (intersectionType != NO_INTERSECTION) {
 	   // If the lines are intersecting, add them to the intersectedPairs list for
 	   // later resolution.
@@ -236,20 +179,19 @@ int Quadtree::detectLineLineCollisionsTwoLines(vector<Line *> * _lines,
   
 }
 
-int Quadtree::detectSpanningLineLineCollisions(vector<Line *> * _spanningLines,
-                              vector<Line *> * _linesOne, vector<Line *> * _linesTwo,
-                            vector<Line *> * _linesThree, vector<Line *> * _linesFour)
-{
-   int totalLineLineCollisions = 0;
+int Quadtree::detectSpanningLineLineCollisions(){
+  cilk::reducer_opadd<int> totalLineLineCollisions;
 
    // Detects collisions between spanning lines and the lines associated with each of the
    // four child Quadtrees
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesOne);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesTwo);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesThree);
-   totalLineLineCollisions += detectLineLineCollisionsTwoLines(_spanningLines, _linesFour);
-   totalLineLineCollisions += detectLineLineCollisions(_spanningLines);
-   return totalLineLineCollisions;
+   #pragma cilk grainsize=1
+   cilk_for(int i = 0; i < NUMBER_CHILD_NODES; i++){
+     totalLineLineCollisions += detectCollisionsTwoLineSets(&spanningLines, &child[i]->lines);
+   }
+   
+   // Detect collisions between all lines that span the quadtrees
+   totalLineLineCollisions += detectLineLineCollisions(&spanningLines);
+   return totalLineLineCollisions.get_value();
 }
 
 int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
@@ -257,11 +199,14 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    cilk::reducer_opadd<int> totalLineLineCollisions;
 
    // Checks if any pair of lines in _lines has a collision. This is O(n^2).
+   #pragma cilk grainsize=4
    cilk_for (int i = 0; i < _lines->size(); ++i) {
       Line *l1 = _lines->at(i);
+      
       for (int j = i + 1; j < _lines->size(); ++j) {
          Line *l2 = _lines->at(j);
          IntersectionType intersectionType = intersect(l1, l2, timeStep);
+	 
          if (intersectionType != NO_INTERSECTION) {
   	    // If the lines are intersecting, add them to the intersectedPairs list for
 	    // later resolution.
@@ -273,8 +218,7 @@ int Quadtree::detectLineLineCollisions(vector<Line *> * _lines) {
    return totalLineLineCollisions.get_value();
 }
 
-void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
-                                     intersectionType)
+void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType intersectionType)
 {
    // Despite our efforts to determine whether lines will intersect ahead of
    // time (and to modify their velocities appropriately), our simplified model
@@ -336,20 +280,12 @@ void Quadtree::collisionSolver(Line *l1, Line *l2, IntersectionType
 
    return;
 }
-Quadtree::~Quadtree() {
-  if (one != NULL) {
-    delete one;
-  }
-  if (two != NULL) {
-    delete two;
-  }
-  if (three != NULL) {
-    delete three;
-  }
-  if (four != NULL) {
-    delete four;
-  }
 
+Quadtree::~Quadtree() {
+  for(int i = 0; i < NUMBER_CHILD_NODES; i++){
+    delete child[i];
+  }
+  
   delete intersectedPairs;
 }
 
